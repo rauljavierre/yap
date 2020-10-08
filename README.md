@@ -1,4 +1,4 @@
-# Web Engineering 2020-2021 / URL Shortener
+# Web Engineering 2020-2021 / Yap
 
 [![Build Status](https://travis-ci.com/UNIZAR-30246-WebEngineering/UrlShortener.svg?branch=master)](https://travis-ci.com/UNIZAR-30246-WebEngineering/UrlShortener)
 
