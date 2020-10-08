@@ -1,6 +1,6 @@
-# Web Engineering 2020-2021 / Yap
+# Web Engineering 2020-2021 | "Yap"
 
-[![Build Status](https://travis-ci.com/UNIZAR-30246-WebEngineering/UrlShortener.svg?branch=master)](https://travis-ci.com/UNIZAR-30246-WebEngineering/UrlShortener)
+[![Build Status](https://travis-ci.com/rauljavierre/yap.svg?branch=master)](https://travis-ci.com/rauljavierre/yap)
 
 This is the start repository for the project developed in this course. 
 
