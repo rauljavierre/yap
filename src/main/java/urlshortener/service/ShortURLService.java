@@ -5,9 +5,11 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 
 import org.springframework.stereotype.Service;
-import urlshortener.domain.ShortURL;
+import urlshortener.model.ShortURL;
 import urlshortener.repository.ShortURLRepository;
 import urlshortener.web.UrlShortenerController;
+
+import java.util.List;
 
 @Service
 public class ShortURLService {
@@ -37,4 +39,9 @@ public class ShortURLService {
         .build();
     return shortURLRepository.save(su);
   }
+
+  public List<ShortURL> getList() {
+    return shortURLRepository.list(shortURLRepository.count(), 0L);
+  }
+
 }

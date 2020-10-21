@@ -2,6 +2,7 @@ package urlshortener.web;
 
 import java.net.URI;
 import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.validator.routines.UrlValidator;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import urlshortener.domain.ShortURL;
+import urlshortener.model.ShortURL;
 import urlshortener.service.ClickService;
 import urlshortener.service.ShortURLService;
 
@@ -37,6 +38,7 @@ public class UrlShortenerController {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
   }
+
 
   @RequestMapping(value = "/link", method = RequestMethod.POST)
   public ResponseEntity<ShortURL> shortener(@RequestParam("url") String url,

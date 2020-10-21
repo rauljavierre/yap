@@ -13,7 +13,7 @@ import org.junit.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
-import urlshortener.domain.Click;
+import urlshortener.model.Click;
 import urlshortener.fixtures.ClickFixture;
 import urlshortener.fixtures.ShortURLFixture;
 import urlshortener.repository.impl.ClickRepositoryImpl;

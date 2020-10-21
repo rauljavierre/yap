@@ -1,6 +1,6 @@
 package urlshortener.fixtures;
 
-import urlshortener.domain.ShortURL;
+import urlshortener.model.ShortURL;
 
 public class ShortURLFixture {
 

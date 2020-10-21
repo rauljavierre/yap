@@ -9,7 +9,7 @@ import java.sql.Date;
 import java.util.UUID;
 import java.util.function.Function;
 import org.springframework.http.HttpStatus;
-import urlshortener.domain.ShortURL;
+import urlshortener.model.ShortURL;
 
 public class ShortURLBuilder {
 

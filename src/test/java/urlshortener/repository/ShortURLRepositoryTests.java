@@ -21,7 +21,7 @@ import org.junit.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
-import urlshortener.domain.ShortURL;
+import urlshortener.model.ShortURL;
 import urlshortener.repository.impl.ShortURLRepositoryImpl;
 
 public class ShortURLRepositoryTests {

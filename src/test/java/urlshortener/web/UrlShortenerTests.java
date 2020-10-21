@@ -22,7 +22,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import urlshortener.domain.ShortURL;
+import urlshortener.model.ShortURL;
 import urlshortener.service.ClickService;
 import urlshortener.service.ShortURLService;
 

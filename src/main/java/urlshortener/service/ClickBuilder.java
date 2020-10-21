@@ -1,7 +1,7 @@
 package urlshortener.service;
 
 import java.sql.Date;
-import urlshortener.domain.Click;
+import urlshortener.model.Click;
 
 public class ClickBuilder {
 

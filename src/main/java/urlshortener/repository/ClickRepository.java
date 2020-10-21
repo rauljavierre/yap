@@ -1,7 +1,7 @@
 package urlshortener.repository;
 
 import java.util.List;
-import urlshortener.domain.Click;
+import urlshortener.model.Click;
 
 public interface ClickRepository {
 

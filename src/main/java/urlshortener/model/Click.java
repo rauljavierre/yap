@@ -1,4 +1,4 @@
-package urlshortener.domain;
+package urlshortener.model;
 
 import java.sql.Date;
 

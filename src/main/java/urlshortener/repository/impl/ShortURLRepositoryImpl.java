@@ -10,7 +10,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
-import urlshortener.domain.ShortURL;
+import urlshortener.model.ShortURL;
 import urlshortener.repository.ShortURLRepository;
 
 @Repository
