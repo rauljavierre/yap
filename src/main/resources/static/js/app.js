@@ -10,9 +10,9 @@ $(document).ready(
                     success: function (msg) {
                         $("#result").html(
                             "<div class='alert alert-success lead'><a target='_blank' href='"
-                            + msg.uri
+                            + msg
                             + "'>"
-                            + msg.uri
+                            + msg
                             + "</a></div>");
                     },
                     error: function () {
