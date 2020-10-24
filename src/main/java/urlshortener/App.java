@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.http.MediaType;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.spi.DocumentationType;
@@ -34,6 +35,14 @@ import java.util.concurrent.TimeoutException;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+
+
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.io.ByteArrayOutputStream;
+
 
 @SpringBootApplication
 @Controller
@@ -107,6 +116,20 @@ public class App {
         return new ResponseEntity<>(info, HttpStatus.OK);
     }
 
+
+    @GetMapping(value="/qr", produces = MediaType.IMAGE_JPEG_VALUE)
+    public ResponseEntity<byte[]> shortener(@RequestParam("url") String url) throws IOException {
+        String api = "https://qrickit.com/api/qr.php";
+        String myQRRequest = api + "?d="+ url + "&t=j";
+        URL apiURL = new URL(myQRRequest);
+
+        BufferedImage image = ImageIO.read(apiURL);
+        ByteArrayOutputStream aux = new ByteArrayOutputStream();
+        ImageIO.write(image,"jpg",aux);
+        byte[] response = aux.toByteArray();
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
     private String readFromRabbitMQ(String key) {
         try {
             String info = new String(this.channelMap.get(key).basicGet(key, false).getBody(), StandardCharsets.UTF_8);
@@ -155,4 +178,6 @@ public class App {
             }
         }
     }
+
+
 }
