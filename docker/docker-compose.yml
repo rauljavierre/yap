@@ -8,6 +8,11 @@ services:
     links:
       - db
 
+  rabbitmq:
+    build: ./rabbitmq
+    ports:
+      - ${RABBITMQ_HOST_PORT}:${RABBITMQ_CONTAINER_PORT}
+
   db:
     build: ./redis-docker
     image: redis:latest

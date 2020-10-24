@@ -11,7 +11,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,13 +20,20 @@ import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
+
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.TimeoutException;
+
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
 
 @SpringBootApplication
 @Controller
@@ -36,6 +42,13 @@ public class App {
     public static void main(String[] args) {
         SpringApplication.run(App.class, args);
     }
+
+    private Map<String, String> lastAvailableMap = new HashMap<>();
+    private Map<String, Channel> channelMap = null;
+    private List<String> informationKeys = Arrays.asList(
+            "total-memory-queue", "used-memory-queue",
+            "available-memory-queue", "platform-queue", "cpu-used-queue",
+            "cpu-cores-queue", "cpu-frequency-queue", "boot-time-queue");
 
     @Bean
     public Docket api() {
@@ -79,14 +92,31 @@ public class App {
     @GetMapping("/get_info")
     public ResponseEntity<HashMap<String, String>> getInfo() {
         HashMap<String, String> info = new HashMap<>();
+        initialize();   // initialize connections with rabbitmq if needed
 
-        String numberOfURLs = getNumberOfURLs();
-
-        info.put("NumberOfURLs", numberOfURLs);
+        info.put("NumberOfURLsStored", getNumberOfURLs());
+        info.put("TotalMemory", readFromRabbitMQ("total-memory-queue"));
+        info.put("UsedMemory", readFromRabbitMQ("used-memory-queue"));
+        info.put("AvailableMemory", readFromRabbitMQ("available-memory-queue"));
+        info.put("Platform", readFromRabbitMQ("platform-queue"));
+        info.put("UsageOfCPU", readFromRabbitMQ("cpu-used-queue"));
+        info.put("NumberOfCores", readFromRabbitMQ("cpu-cores-queue"));
+        info.put("CPUFrequency", readFromRabbitMQ("cpu-frequency-queue"));
+        info.put("BootTime", readFromRabbitMQ("boot-time-queue"));
 
         return new ResponseEntity<>(info, HttpStatus.OK);
     }
 
+    private String readFromRabbitMQ(String key) {
+        try {
+            String info = new String(this.channelMap.get(key).basicGet(key, false).getBody(), StandardCharsets.UTF_8);
+            this.lastAvailableMap.put(key, info);
+            return info;
+        }
+        catch (NullPointerException | IOException e){   // No updates | Connection Problems
+            return lastAvailableMap.get(key);
+        }
+    }
 
     private String getNumberOfURLs() {
         Set<byte[]> keys = sharedData.getConnectionFactory().getConnection().keys("*".getBytes());
@@ -103,6 +133,26 @@ public class App {
         }
         catch (Exception e) {   // Timeouts...
             return false;
+        }
+    }
+
+    private void initialize() {
+        if(channelMap == null) {
+            ConnectionFactory factory = new ConnectionFactory();
+            factory.setHost("rabbitmq");
+            try {
+                channelMap = new HashMap<>();
+                Connection connection = factory.newConnection();
+                Map<String, Object> args = new HashMap<>();
+                args.put("x-max-length", 1);
+                for (String key : informationKeys) {
+                    Channel c = connection.createChannel();
+                    this.channelMap.put(key, c);
+                    c.queueDeclare(key, false, false, false, args);
+                }
+            } catch (IOException | TimeoutException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
