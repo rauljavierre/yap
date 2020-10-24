@@ -15,6 +15,5 @@ services:
 
   db:
     build: ./redis-docker
-    image: redis:latest
     ports:
       - ${REDIS_HOST_PORT}:${REDIS_CONTAINER_PORT}
