@@ -4,10 +4,10 @@
 # Ignore Gradle build output directory
 build
 
+gradlew.bat
 gradlew
 
 gradle
 
-gradle.bat
 
 .idea
