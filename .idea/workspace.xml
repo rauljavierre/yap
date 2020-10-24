@@ -23,47 +23,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="389edb48-f4bf-460d-be29-6beb3e039017" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/docker/.env" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docker/docker-compose.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docker/down.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docker/redis-docker/Dockerfile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docker/spring-docker/Dockerfile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docker/up.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.travis.yml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/LICENSE" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/gradlew" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/gradlew.bat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/settings.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/settings.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/urlshortener/Application.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/urlshortener/config/PersistenceConfiguration.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/urlshortener/model/Click.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/urlshortener/model/ShortURL.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/urlshortener/repository/ClickRepository.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/urlshortener/repository/ShortURLRepository.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/urlshortener/repository/impl/ClickRepositoryImpl.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/urlshortener/repository/impl/ShortURLRepositoryImpl.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/urlshortener/service/ClickBuilder.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/urlshortener/service/ClickService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/urlshortener/service/ShortURLBuilder.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/urlshortener/service/ShortURLService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/urlshortener/web/UrlShortenerController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/schema-hsqldb.sql" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/static/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/static/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/static/js/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/static/js/app.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/urlshortener/fixtures/ClickFixture.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/urlshortener/fixtures/ShortURLFixture.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/urlshortener/integration/SystemTests.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/urlshortener/repository/ClickRepositoryTests.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/urlshortener/repository/ShortURLRepositoryTests.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/urlshortener/web/UrlShortenerTests.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/resources/application.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/resources/schema-hsqldb.sql" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/urlshortener/App.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/urlshortener/App.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -142,17 +105,6 @@
     </option>
   </component>
   <component name="RunManager" selected="Gradle.yap [build]">
-    <configuration default="true" type="ArquillianJUnit" factoryName="" nameIsGenerated="true">
-      <option name="arquillianRunConfiguration">
-        <value>
-          <option name="containerStateName" value="" />
-        </value>
-      </option>
-      <option name="TEST_OBJECT" value="class" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="yap [buildDependents]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -230,6 +182,7 @@
       <option name="presentableId" value="Default" />
       <updated>1603482406309</updated>
       <workItem from="1603482408400" duration="4753000" />
+      <workItem from="1603529835003" duration="70000" />
     </task>
     <servers />
   </component>
@@ -246,6 +199,7 @@
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="WindowStateProjectService">
     <state x="550" y="216" width="800" height="679" key="#Docker" timestamp="1603482873065">

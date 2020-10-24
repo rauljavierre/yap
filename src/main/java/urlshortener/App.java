@@ -30,7 +30,9 @@ import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 import javax.servlet.http.HttpServletRequest;
+import java.net.HttpURLConnection;
 import java.net.URI;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 @SpringBootApplication
@@ -42,14 +44,14 @@ public class App {
     }
 
     @Bean
-    public Docket api() { 
-        return new Docket(DocumentationType.SWAGGER_2)  
-          .select()                                  
-          .apis(RequestHandlerSelectors.any())              
-          .paths(PathSelectors.any())                          
-          .build();                                           
+    public Docket api() {
+        return new Docket(DocumentationType.SWAGGER_2)
+                .select()
+                .apis(RequestHandlerSelectors.any())
+                .paths(PathSelectors.any())
+                .build();
     }
-    
+
     @Autowired
     private StringRedisTemplate sharedData;
 
@@ -68,7 +70,7 @@ public class App {
     @PostMapping("/link")
     public ResponseEntity<String> shortener(@RequestParam("url") String url, HttpServletRequest req) {
         UrlValidator urlValidator = new UrlValidator(new String[]{"http", "https"});
-        if (url != null && urlValidator.isValid(url)) {
+        if (url != null && urlValidator.isValid(url) && this.urlExists(url)) {
             String id = Hashing.murmur3_32().hashString(url, StandardCharsets.UTF_8).toString();
             sharedData.opsForValue().set(id, url);
             URI location = URI.create(req.getRequestURL().append("/"+id).toString());
@@ -77,6 +79,19 @@ public class App {
             return new ResponseEntity<>(id, responseHeaders, HttpStatus.CREATED);
         } else {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    // https://www.rgagnon.com/javadetails/java-0059.html
+    public static boolean urlExists(String URLName){
+        try {
+            HttpURLConnection.setFollowRedirects(false);
+            HttpURLConnection con = (HttpURLConnection) new URL(URLName).openConnection();
+            con.setRequestMethod("HEAD");
+            return (con.getResponseCode() == HttpURLConnection.HTTP_OK);
+        }
+        catch (Exception e) {   // Timeouts...
+            return false;
         }
     }
 }
