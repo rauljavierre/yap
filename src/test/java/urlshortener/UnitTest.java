@@ -53,4 +53,12 @@ public class UnitTest {
 				andExpect(header().string("Location", is(HTTP_EXAMPLE_COM)));
 	}
 
+	@Test
+	public void testQRGeneration() throws Exception {
+		given(stringRedisTemplate.opsForValue()).willReturn(valueOperations);
+		this.mvc.perform(get("/qr")
+				.contentType(MediaType.APPLICATION_FORM_URLENCODED).param("url", HTTP_EXAMPLE_COM)).
+				andExpect(status().isOk()).
+				andExpect(header().string("Location", is(HTTP_EXAMPLE_COM)));
+	}
 }

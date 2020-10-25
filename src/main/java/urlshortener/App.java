@@ -116,18 +116,32 @@ public class App {
         return new ResponseEntity<>(info, HttpStatus.OK);
     }
 
-
+    /*
+        API: https://qrickit.com/qrickit_apps/qrickit_api.php
+     */
     @GetMapping(value="/qr", produces = MediaType.IMAGE_JPEG_VALUE)
     public ResponseEntity<byte[]> shortener(@RequestParam("url") String url) throws IOException {
-        String api = "https://qrickit.com/api/qr.php";
-        String myQRRequest = api + "?d="+ url + "&t=j";
-        URL apiURL = new URL(myQRRequest);
+        UrlValidator urlValidator = new UrlValidator(new String[]{"http", "https"});
+        if (url != null && urlValidator.isValid(url) && this.urlExists(url)) {
+            String api = "https://qrickit.com/api/qr.php";
+            String myQRRequest = api + "?d=" + url + "&t=j&qrsize=400";
+            URI initialURL = URI.create(url);
+            URL apiURL = new URL(myQRRequest);
 
-        BufferedImage image = ImageIO.read(apiURL);
-        ByteArrayOutputStream aux = new ByteArrayOutputStream();
-        ImageIO.write(image,"jpg",aux);
-        byte[] response = aux.toByteArray();
-        return new ResponseEntity<>(response, HttpStatus.OK);
+            BufferedImage image = ImageIO.read(apiURL);
+            ByteArrayOutputStream aux = new ByteArrayOutputStream();
+            ImageIO.write(image, "jpg", aux);
+            byte[] response = aux.toByteArray();
+
+            HttpHeaders responseHeaders = new HttpHeaders();
+            responseHeaders.setLocation(initialURL);
+            responseHeaders.setContentType(MediaType.IMAGE_JPEG);
+            responseHeaders.setContentLength(response.length);
+
+            return new ResponseEntity<>(response,responseHeaders, HttpStatus.OK);
+        }else{
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
 
     private String readFromRabbitMQ(String key) {
