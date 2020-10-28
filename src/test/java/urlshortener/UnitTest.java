@@ -48,7 +48,7 @@ public class UnitTest {
 	public void testRedirection() throws Exception {
 		given(stringRedisTemplate.opsForValue()).willReturn(valueOperations);
 		given(valueOperations.get(HASH)).willReturn(HTTP_EXAMPLE_COM);
-		this.mvc.perform(get("/"+HASH)).
+		this.mvc.perform(get("/r/"+HASH)).
 				andExpect(status().isTemporaryRedirect()).
 				andExpect(header().string("Location", is(HTTP_EXAMPLE_COM)));
 	}
