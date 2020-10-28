@@ -12,9 +12,5 @@ jobs:
         with:
           java-version: 1.8
       - uses: eskatos/gradle-command-action@v1
-          with:
+        with:
             arguments: build
-
-      - name: Run command
-        run: |
-          ls
