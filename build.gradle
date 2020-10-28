@@ -12,6 +12,10 @@ plugins {
     id 'java'
 }
 
+// Test coverage
+// https://medium.com/@petehouston/generate-java-test-coverage-using-gradle-4794f4b09f65
+apply plugin: 'jacoco'
+
 apply plugin: 'idea'
 
 sourceCompatibility = 1.8

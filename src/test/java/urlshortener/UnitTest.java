@@ -41,7 +41,7 @@ public class UnitTest {
 		this.mvc.perform(post("/link")
 				.contentType(MediaType.APPLICATION_FORM_URLENCODED).param("url", HTTP_EXAMPLE_COM)).
 				andExpect(status().isCreated()).
-				andExpect(header().string("Locaion", is(HASH_HTTP_EXAMPLE_COM)));
+				andExpect(header().string("Location", is(HASH_HTTP_EXAMPLE_COM)));
 	}
 
 	@Test
