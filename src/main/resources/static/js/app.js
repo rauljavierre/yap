@@ -10,6 +10,7 @@ $(document).ready(
                     success: function (msg) {
                         $("#result").html(
                             "<div class='alert alert-success lead'><a target='_blank' href='"
+                            + "/r/"
                             + msg
                             + "'>"
                             + msg
