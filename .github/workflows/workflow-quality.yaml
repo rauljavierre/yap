@@ -1,9 +1,10 @@
-name: Java CI
+name: CI
 
 on: [push]
 
 jobs:
   build:
+    name: CI
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -13,3 +14,7 @@ jobs:
       - uses: eskatos/gradle-command-action@v1
           with:
             arguments: build
+
+      - name: Run command
+        run: |
+          ls
