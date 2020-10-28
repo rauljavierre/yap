@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -69,7 +70,7 @@ public class App {
     @Autowired
     private StringRedisTemplate sharedData;
 
-    @GetMapping("/{id:(?!link|index).*}")
+    @GetMapping("/r/{id:(?!link|index).*}")
     public ResponseEntity<Void> redirectTo(@PathVariable String id) {
         String key = sharedData.opsForValue().get(id);
         if (key != null) {
