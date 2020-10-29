@@ -37,11 +37,17 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 
-
+//FOR QR
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
+
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.WriterException;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
 
 @SpringBootApplication
 @Controller
@@ -115,29 +121,60 @@ public class App {
         return new ResponseEntity<>(info, HttpStatus.OK);
     }
 
-    /*
-        API: https://qrickit.com/qrickit_apps/qrickit_api.php
-     */
+
     @GetMapping(value="/qr", produces = MediaType.IMAGE_JPEG_VALUE)
-    public ResponseEntity<byte[]> shortener(@RequestParam("url") String url) throws IOException {
+    public ResponseEntity<byte[]> qr(@RequestParam("url") String url) throws IOException,WriterException {
         UrlValidator urlValidator = new UrlValidator(new String[]{"http", "https"});
         if (url != null && urlValidator.isValid(url) && this.urlExists(url)) {
-            String api = "https://qrickit.com/api/qr.php";
-            String myQRRequest = api + "?d=" + url + "&t=j&qrsize=400";
             URI initialURL = URI.create(url);
-            URL apiURL = new URL(myQRRequest);
-
-            BufferedImage image = ImageIO.read(apiURL);
-            ByteArrayOutputStream aux = new ByteArrayOutputStream();
-            ImageIO.write(image, "jpg", aux);
-            byte[] response = aux.toByteArray();
-
+            byte[] response = this.qrGeneratorLibrary(url);
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.setLocation(initialURL);
             responseHeaders.setContentType(MediaType.IMAGE_JPEG);
             responseHeaders.setContentLength(response.length);
-
             return new ResponseEntity<>(response,responseHeaders, HttpStatus.OK);
+        }else{
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping(value="/qrTime")
+    public ResponseEntity<String> qrTime(@RequestParam("url") String url) throws IOException, WriterException {
+        UrlValidator urlValidator = new UrlValidator(new String[]{"http", "https"});
+        if (url != null && urlValidator.isValid(url) && this.urlExists(url)) {
+            long t = System.currentTimeMillis();
+            byte[] response = this.qrGeneratorLibrary(url);
+            t = System.currentTimeMillis() - t;
+            String r = Long.toString(t);
+            return new ResponseEntity<>(r, HttpStatus.OK);
+        }else{
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping(value="/qrAPI", produces = MediaType.IMAGE_JPEG_VALUE)
+    public ResponseEntity<byte[]> qrAPI(@RequestParam("url") String url) throws IOException{
+        UrlValidator urlValidator = new UrlValidator(new String[]{"http", "https"});
+        if (url != null && urlValidator.isValid(url) && this.urlExists(url)) {
+            byte[] response = this.qrGeneratorAPI(url);
+            HttpHeaders responseHeaders = new HttpHeaders();
+            responseHeaders.setContentType(MediaType.IMAGE_JPEG);
+            responseHeaders.setContentLength(response.length);
+            return new ResponseEntity<>(response,responseHeaders, HttpStatus.OK);
+        }else{
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping(value="/qrAPITime")
+    public ResponseEntity<String> qrAPITime(@RequestParam("url") String url) throws IOException{
+        UrlValidator urlValidator = new UrlValidator(new String[]{"http", "https"});
+        if (url != null && urlValidator.isValid(url) && this.urlExists(url)) {
+            long t = System.currentTimeMillis();
+            byte[] response = this.qrGeneratorAPI(url);
+            t = System.currentTimeMillis() - t;
+            String r = Long.toString(t);
+            return new ResponseEntity<>(r, HttpStatus.OK);
         }else{
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
@@ -264,4 +301,29 @@ public class App {
         return new ArrayList<>(Arrays.asList(fileContent.split(",")));
     }
 
+    // Generates QR from url with library:
+    // https://www.javadoc.io/doc/com.google.zxing/core/3.3.0/com/google/zxing/multi/qrcode/package-summary.html
+    private byte[] qrGeneratorLibrary(String url) throws IOException, WriterException {
+        QRCodeWriter qr = new QRCodeWriter();
+        BitMatrix matrix = qr.encode(url, BarcodeFormat.QR_CODE,400,400);
+        BufferedImage image = MatrixToImageWriter.toBufferedImage(matrix);
+        ByteArrayOutputStream aux = new ByteArrayOutputStream();
+        ImageIO.write(image, "jpg", aux);
+        return aux.toByteArray();
+    }
+
+
+    // Generates QR from url with API:
+    //  https://qrickit.com/qrickit_apps/qrickit_api.php
+    private byte[] qrGeneratorAPI(String url) throws IOException{
+        long t = System.currentTimeMillis();
+        String api = "https://qrickit.com/api/qr.php";
+        String myQRRequest = api + "?d=" + url + "&t=j&qrsize=400";
+        URL apiURL = new URL(myQRRequest);
+
+        BufferedImage image = ImageIO.read(apiURL);
+        ByteArrayOutputStream aux = new ByteArrayOutputStream();
+        ImageIO.write(image, "jpg", aux);
+        return aux.toByteArray();
+    }
 }
