@@ -1,4 +1,4 @@
-# YAP PLATFORM (URL SHORTENER)
+# YAP PLATFORM (URL SHORTENER) - Development http://yapsh.tk/
 
 <img src='https://github.com/rauljavierre/yap/blob/master/logo/logo-2150297.png' width='400'>
 
@@ -18,9 +18,13 @@ Todo...
 
 <code>git clone https://github.com/rauljavierre/yap/</code>
 
-### Install docker
-
-<code>sudo apt-get install docker</code>
+### Install docker and docker-compose
+```
+sudo apt install docker.io</code>
+sudo systemctl start docker
+sudo systemctl enable docker
+sudo apt-get install docker-compose
+```
 
 ### Install gradle
 
@@ -51,7 +55,7 @@ First of all, you need to get the private key (ask the developers if needed)
 ### Add the private key to your SSH connections and login with "ubuntu" user
 
 ```
-chmod 400 ssh-key-2020-10-22.key
-ssh-add ssh-key-2020-10-22.key
-ssh ubuntu@129.146.251.246
+chmod 400 ssh-key-2020-10-29.key
+ssh-add ssh-key-2020-10-29.key
+ssh ubuntu@yapsh.tk
 ```
