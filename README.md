@@ -1,4 +1,4 @@
-# YAP PLATFORM (URL SHORTENER) - Development http://yapsh.tk/
+# YAP PLATFORM (URL SHORTENER) - Development
 
 <img src='https://github.com/rauljavierre/yap/blob/master/logo/logo-2150297.png' width='400'>
 
