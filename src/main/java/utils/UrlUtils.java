@@ -1,5 +1,7 @@
 package utils;
 
+import org.apache.commons.validator.routines.UrlValidator;
+
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -18,4 +20,8 @@ public class UrlUtils {
         }
     }
 
+    public static boolean validateUrl(String url){
+        UrlValidator urlValidator = new UrlValidator(new String[]{"http", "https"});
+        return (url != null && urlValidator.isValid(url) && urlExists(url));
+    }
 }

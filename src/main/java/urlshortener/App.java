@@ -1,5 +1,7 @@
 package urlshortener;
 
+import utils.*;
+
 import com.google.common.hash.Hashing;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,8 +92,8 @@ public class App {
 
     @PostMapping("/link")
     public ResponseEntity<String> shortener(@RequestParam("url") String url, HttpServletRequest req) {
-        UrlValidator urlValidator = new UrlValidator(new String[]{"http", "https"});
-        if (url != null && urlValidator.isValid(url) && this.urlExists(url)) {
+        boolean urlValid = UrlUtils.validateUrl(url);
+        if (urlValid) {
             String id = Hashing.murmur3_32().hashString(url, StandardCharsets.UTF_8).toString();
             sharedData.opsForValue().set(id, url);
             URI location = URI.create(req.getRequestURL().append("/"+id).toString());
@@ -106,28 +108,35 @@ public class App {
     @GetMapping("/get_info")
     public ResponseEntity<HashMap<String, String>> getInfo() {
         HashMap<String, String> info = new HashMap<>();
-        initialize();   // initialize connections with rabbitmq if needed
+        RabbitMQUtils.initialize(this.channelMap,this.informationKeys);   // initialize connections with rabbitmq if needed
 
-        info.put("NumberOfURLsStored", getNumberOfURLs());
-        info.put("TotalMemory", readFromRabbitMQ("total-memory-queue"));
-        info.put("UsedMemory", readFromRabbitMQ("used-memory-queue"));
-        info.put("AvailableMemory", readFromRabbitMQ("available-memory-queue"));
-        info.put("Platform", readFromRabbitMQ("platform-queue"));
-        info.put("UsageOfCPU", readFromRabbitMQ("cpu-used-queue"));
-        info.put("NumberOfCores", readFromRabbitMQ("cpu-cores-queue"));
-        info.put("CPUFrequency", readFromRabbitMQ("cpu-frequency-queue"));
-        info.put("BootTime", readFromRabbitMQ("boot-time-queue"));
-
+        info.put("NumberOfURLsStored", RabbitMQUtils.getNumberOfURLs(sharedData));
+        info.put("TotalMemory",  RabbitMQUtils.readFromRabbitMQ(this.channelMap,this.lastAvailableMap,
+                "total-memory-queue"));
+        info.put("UsedMemory",  RabbitMQUtils.readFromRabbitMQ(this.channelMap,this.lastAvailableMap,
+                "used-memory-queue"));
+        info.put("AvailableMemory",  RabbitMQUtils.readFromRabbitMQ(this.channelMap,this.lastAvailableMap,
+                "available-memory-queue"));
+        info.put("Platform",  RabbitMQUtils.readFromRabbitMQ(this.channelMap,this.lastAvailableMap,
+                "platform-queue"));
+        info.put("UsageOfCPU",  RabbitMQUtils.readFromRabbitMQ(this.channelMap,this.lastAvailableMap,
+                "cpu-used-queue"));
+        info.put("NumberOfCores",  RabbitMQUtils.readFromRabbitMQ(this.channelMap,this.lastAvailableMap,
+                "cpu-cores-queue"));
+        info.put("CPUFrequency",  RabbitMQUtils.readFromRabbitMQ(this.channelMap,this.lastAvailableMap,
+                "cpu-frequency-queue"));
+        info.put("BootTime", RabbitMQUtils.readFromRabbitMQ(this.channelMap,this.lastAvailableMap,
+                "boot-time-queue"));
         return new ResponseEntity<>(info, HttpStatus.OK);
     }
 
 
     @GetMapping(value="/qr", produces = MediaType.IMAGE_JPEG_VALUE)
     public ResponseEntity<byte[]> qr(@RequestParam("url") String url) throws IOException,WriterException {
-        UrlValidator urlValidator = new UrlValidator(new String[]{"http", "https"});
-        if (url != null && urlValidator.isValid(url) && this.urlExists(url)) {
+        boolean urlValid = UrlUtils.validateUrl(url);
+        if (urlValid) {
             URI initialURL = URI.create(url);
-            byte[] response = this.qrGeneratorLibrary(url);
+            byte[] response = QrCodeUtils.qrGeneratorLibrary(url);
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.setLocation(initialURL);
             responseHeaders.setContentType(MediaType.IMAGE_JPEG);
@@ -140,10 +149,10 @@ public class App {
 
     @GetMapping(value="/qrTime")
     public ResponseEntity<String> qrTime(@RequestParam("url") String url) throws IOException, WriterException {
-        UrlValidator urlValidator = new UrlValidator(new String[]{"http", "https"});
-        if (url != null && urlValidator.isValid(url) && this.urlExists(url)) {
+        boolean urlValid = UrlUtils.validateUrl(url);
+        if (urlValid) {
             long t = System.currentTimeMillis();
-            byte[] response = this.qrGeneratorLibrary(url);
+            byte[] response = QrCodeUtils.qrGeneratorLibrary(url);
             t = System.currentTimeMillis() - t;
             String r = Long.toString(t);
             return new ResponseEntity<>(r, HttpStatus.OK);
@@ -154,9 +163,9 @@ public class App {
 
     @GetMapping(value="/qrAPI", produces = MediaType.IMAGE_JPEG_VALUE)
     public ResponseEntity<byte[]> qrAPI(@RequestParam("url") String url) throws IOException{
-        UrlValidator urlValidator = new UrlValidator(new String[]{"http", "https"});
-        if (url != null && urlValidator.isValid(url) && this.urlExists(url)) {
-            byte[] response = this.qrGeneratorAPI(url);
+        boolean urlValid = UrlUtils.validateUrl(url);
+        if (urlValid) {
+            byte[] response = QrCodeUtils.qrGeneratorAPI(url);
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.setContentType(MediaType.IMAGE_JPEG);
             responseHeaders.setContentLength(response.length);
@@ -168,10 +177,10 @@ public class App {
 
     @GetMapping(value="/qrAPITime")
     public ResponseEntity<String> qrAPITime(@RequestParam("url") String url) throws IOException{
-        UrlValidator urlValidator = new UrlValidator(new String[]{"http", "https"});
-        if (url != null && urlValidator.isValid(url) && this.urlExists(url)) {
+        boolean urlValid = UrlUtils.validateUrl(url);
+        if (urlValid) {
             long t = System.currentTimeMillis();
-            byte[] response = this.qrGeneratorAPI(url);
+            byte[] response = QrCodeUtils.qrGeneratorAPI(url);
             t = System.currentTimeMillis() - t;
             String r = Long.toString(t);
             return new ResponseEntity<>(r, HttpStatus.OK);
@@ -184,13 +193,13 @@ public class App {
     public ResponseEntity<String> shortener(@RequestParam("file") MultipartFile file) {
         if (!file.isEmpty()) {
             // Parse file and get URL list
-            List<String> longURLs = getCSVUrls(file);
+            List<String> longURLs = CsvUtils.getCSVUrls(file);
             List<String> shorURLs = new ArrayList<>();
             // Iterate the URL list
             UrlValidator urlValidator = new UrlValidator(new String[]{"http", "https"});
             for (String currentURL : longURLs) {
                 // Validate current URL
-                if (currentURL != null && urlValidator.isValid(currentURL) && this.urlExists(currentURL)) {
+                if (currentURL != null && urlValidator.isValid(currentURL) && UrlUtils.urlExists(currentURL)) {
                     // Generate the short URL
                     String id = Hashing.murmur3_32().hashString(currentURL, StandardCharsets.UTF_8).toString();
                     sharedData.opsForValue().set(id, currentURL);
@@ -238,92 +247,5 @@ public class App {
         else {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-    }
-
-    private String readFromRabbitMQ(String key) {
-        try {
-            String info = new String(this.channelMap.get(key).basicGet(key, false).getBody(), StandardCharsets.UTF_8);
-            this.lastAvailableMap.put(key, info);
-            return info;
-        }
-        catch (NullPointerException | IOException e){   // No updates | Connection Problems
-            return lastAvailableMap.get(key);
-        }
-    }
-
-    private String getNumberOfURLs() {
-        Set<byte[]> keys = sharedData.getConnectionFactory().getConnection().keys("*".getBytes());
-        return Long.toString(keys.size());
-    }
-
-    // https://www.rgagnon.com/javadetails/java-0059.html
-    public static boolean urlExists(String URLName){
-        try {
-            HttpURLConnection.setFollowRedirects(false);
-            HttpURLConnection con = (HttpURLConnection) new URL(URLName).openConnection();
-            con.setRequestMethod("HEAD");
-            return (con.getResponseCode() == HttpURLConnection.HTTP_OK);
-        }
-        catch (Exception e) {   // Timeouts...
-            return false;
-        }
-    }
-
-    private void initialize() {
-        if(channelMap == null) {
-            ConnectionFactory factory = new ConnectionFactory();
-            factory.setHost("rabbitmq");
-            try {
-                channelMap = new HashMap<>();
-                Connection connection = factory.newConnection();
-                Map<String, Object> args = new HashMap<>();
-                args.put("x-max-length", 1);
-                for (String key : informationKeys) {
-                    Channel c = connection.createChannel();
-                    this.channelMap.put(key, c);
-                    c.queueDeclare(key, false, false, false, args);
-                }
-            } catch (IOException | TimeoutException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    // Read the CSV and return a list of URLs.
-    private List<String> getCSVUrls (MultipartFile f) {
-        String fileContent = "";
-        try {
-            fileContent = new String(f.getBytes(), StandardCharsets.UTF_8);
-            fileContent = fileContent.replace("\n", "").replace("\r", "");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return new ArrayList<>(Arrays.asList(fileContent.split(",")));
-    }
-
-    // Generates QR from url with library:
-    // https://www.javadoc.io/doc/com.google.zxing/core/3.3.0/com/google/zxing/multi/qrcode/package-summary.html
-    private byte[] qrGeneratorLibrary(String url) throws IOException, WriterException {
-        QRCodeWriter qr = new QRCodeWriter();
-        BitMatrix matrix = qr.encode(url, BarcodeFormat.QR_CODE,400,400);
-        BufferedImage image = MatrixToImageWriter.toBufferedImage(matrix);
-        ByteArrayOutputStream aux = new ByteArrayOutputStream();
-        ImageIO.write(image, "jpg", aux);
-        return aux.toByteArray();
-    }
-
-
-    // Generates QR from url with API:
-    //  https://qrickit.com/qrickit_apps/qrickit_api.php
-    private byte[] qrGeneratorAPI(String url) throws IOException{
-        long t = System.currentTimeMillis();
-        String api = "https://qrickit.com/api/qr.php";
-        String myQRRequest = api + "?d=" + url + "&t=j&qrsize=400";
-        URL apiURL = new URL(myQRRequest);
-
-        BufferedImage image = ImageIO.read(apiURL);
-        ByteArrayOutputStream aux = new ByteArrayOutputStream();
-        ImageIO.write(image, "jpg", aux);
-        return aux.toByteArray();
     }
 }
