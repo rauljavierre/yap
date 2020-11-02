@@ -2,12 +2,8 @@ package urlshortener.utils;
 
 import java.io.*;
 import java.net.URL;
-
-//FOR QR
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.BarcodeFormat;
@@ -27,15 +23,12 @@ public class QrCodeUtils {
         return aux.toByteArray();
     }
 
-
     // Generates QR from url with API:
     //  https://qrickit.com/qrickit_apps/qrickit_api.php
     public static byte[] qrGeneratorAPI(String url) throws IOException{
-        long t = System.currentTimeMillis();
         String api = "https://qrickit.com/api/qr.php";
         String myQRRequest = api + "?d=" + url + "&t=j&qrsize=400";
         URL apiURL = new URL(myQRRequest);
-
         BufferedImage image = ImageIO.read(apiURL);
         ByteArrayOutputStream aux = new ByteArrayOutputStream();
         ImageIO.write(image, "jpg", aux);

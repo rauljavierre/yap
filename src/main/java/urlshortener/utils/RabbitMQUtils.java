@@ -1,12 +1,10 @@
 package urlshortener.utils;
 
 import org.springframework.data.redis.core.StringRedisTemplate;
-
 import java.util.*;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeoutException;
 import java.io.IOException;
-
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
@@ -25,12 +23,9 @@ public class RabbitMQUtils {
         }
     }
 
-
-    public static String getNumberOfURLs(StringRedisTemplate sharedData) {
-        Set<byte[]> keys = sharedData.getConnectionFactory().getConnection().keys("*".getBytes());
-        return Long.toString(keys.size());
+    public static String getNumberOf(StringRedisTemplate constantsMap, String param) {
+        return constantsMap.opsForValue().get(param);
     }
-
 
     public static void initialize(Map<String, Channel> channelMap,List<String> informationKeys) {
         if(channelMap == null) {

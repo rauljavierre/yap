@@ -3,7 +3,7 @@
 sudo bash down.sh
 
 cd ..
-gradle build # sudo snap install gradle --classic
+gradle build --stacktrace # sudo snap install gradle --classic
 
 if [ $? -ne 0 ]; then
   exit

@@ -5,7 +5,7 @@
 ## SEE THE API DOCUMENTATION ON SWAGGER
 Todo...
 
-</br>
+<br>
 
 ## HOW TO BUILD AND LAUNCH THE ENTIRE APPLICATION
 
@@ -30,7 +30,7 @@ sudo apt-get install docker-compose
 
 <code>sudo snap install gradle --classic</code>
 
-### Install python3 and dependecies
+### Install python3 and dependencies
 ```
 sudo apt-get install python3
 sudo apt-get install pip
@@ -45,7 +45,7 @@ cd ./docker
 sudo bash up.sh
 ```
 
-</br>
+<br>
 
 
 ## HOW TO CONNECT TO THE HOST VIA SSH
