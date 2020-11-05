@@ -20,7 +20,7 @@ Todo...
 
 ### Install docker and docker-compose
 ```
-sudo apt install docker.io</code>
+sudo apt install docker.io
 sudo systemctl start docker
 sudo systemctl enable docker
 sudo apt-get install docker-compose
@@ -33,10 +33,10 @@ sudo apt-get install docker-compose
 ### Install python3 and dependencies
 ```
 sudo apt-get install python3
-sudo apt-get install pip
+sudo apt install python3-pip
 sudo apt-get install python3-dev
-pip install pika
-pip install psutil
+pip3 install pika
+pip3 install psutil
 ```
 
 ### Run the server
@@ -50,12 +50,12 @@ sudo bash up.sh
 
 ## HOW TO CONNECT TO THE HOST VIA SSH
 
-First of all, you need to get the private key (ask the developers if needed)
+First of all, you need to generate a pair of keys. Then, you are able to send the public key to us in order to give you access to the host.
 
-### Add the private key to your SSH connections and login with "ubuntu" user
+### Add the private key to your SSH connections and login
 
 ```
-chmod 400 ssh-key-2020-10-29.key
-ssh-add ssh-key-2020-10-29.key
-ssh ubuntu@yapsh.tk
+chmod 400 <private-key>
+ssh-add <private-key>
+ssh yapsh.tk
 ```
