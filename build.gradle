@@ -10,11 +10,12 @@ plugins {
     id 'org.springframework.boot' version '2.3.3.RELEASE'
     id 'io.spring.dependency-management' version '1.0.10.RELEASE'
     id 'java'
-}
 
-// Test coverage
-// https://medium.com/@petehouston/generate-java-test-coverage-using-gradle-4794f4b09f65
-apply plugin: 'jacoco'
+    // https://tomgregory.com/how-to-measure-code-coverage-using-sonarqube-and-jacoco/
+    id 'jacoco'
+    id 'org.sonarqube' version '3.0'
+    id 'com.palantir.docker-compose' version '0.25.0'
+}
 
 apply plugin: 'idea'
 
@@ -22,14 +23,11 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 repositories {
-    // Use jcenter for resolving dependencies.
-    // You can declare any Maven/Ivy/file repository here.
     jcenter()
     mavenCentral()
 }
 
 dependencies {
-    // This dependency is used by the application.
     implementation 'com.google.guava:guava:28.0-jre'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'commons-validator:commons-validator:1.6'
@@ -39,8 +37,10 @@ dependencies {
     implementation 'io.springfox:springfox-swagger2:2.9.2'
     implementation 'io.springfox:springfox-swagger-ui:2.9.2'
 
+    // RabbitMQ
     compile 'com.rabbitmq:amqp-client:5.10.0'
-    //QR library
+
+    // QR library
     // https://mvnrepository.com/artifact/com.google.zxing/javase
     compile group: 'com.google.zxing', name: 'javase', version: '3.3.0'
 
@@ -53,3 +53,17 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.apache.httpcomponents:httpclient'
 }
+
+sonarqube {
+    properties {
+        property 'sonar.host.url', 'http://localhost:9000'
+    }
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+    }
+}
+test.finalizedBy jacocoTestReport
+tasks['sonarqube'].dependsOn test

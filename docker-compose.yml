@@ -2,18 +2,23 @@ version : '3'
 services:
 
   app:
-    build: ./spring-docker
+    build: spring-docker
     ports:
       - ${SPRING_HOST_PORT}:${SPRING_CONTAINER_PORT}
     links:
       - db
 
   rabbitmq:
-    build: ./rabbitmq
+    build: rabbitmq
     ports:
       - ${RABBITMQ_HOST_PORT}:${RABBITMQ_CONTAINER_PORT}
 
   db:
-    build: ./redis-docker
+    build: redis-docker
     ports:
       - ${REDIS_HOST_PORT}:${REDIS_CONTAINER_PORT}
+
+  sonarqube:
+    image: sonarqube:lts
+    ports:
+      - 9000:9000

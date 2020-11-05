@@ -2,14 +2,12 @@
 
 sudo bash down.sh
 
-cd ..
 gradle build --stacktrace # sudo snap install gradle --classic
 
 if [ $? -ne 0 ]; then
   exit
 fi
 
-cd docker
-cp ../build/libs/urlshortener.jar spring-docker
+cp ./build/libs/urlshortener.jar spring-docker
 sudo docker-compose up --build
 sudo bash down.sh
