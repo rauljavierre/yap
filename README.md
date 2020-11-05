@@ -2,21 +2,20 @@
 
 <img src='https://github.com/rauljavierre/yap/blob/master/logo/logo-2150297.png' width='400'>
 
-## SEE THE API DOCUMENTATION ON SWAGGER
-Todo...
 
-<br>
 
 ## HOW TO BUILD AND LAUNCH THE ENTIRE APPLICATION
 
 
 ### Install git
-
-<code>sudo apt-get install git</code>
+```
+sudo apt-get install git</code>
+```
 
 ### Clone this repository in your machine
-
-<code>git clone https://github.com/rauljavierre/yap/</code>
+```
+git clone https://github.com/rauljavierre/yap/
+```
 
 ### Install docker and docker-compose
 ```
@@ -27,8 +26,9 @@ sudo apt-get install docker-compose
 ```
 
 ### Install gradle
-
-<code>sudo snap install gradle --classic</code>
+```
+sudo snap install gradle --classic
+```
 
 ### Install python3 and dependencies
 ```
@@ -45,7 +45,6 @@ cd ./docker
 sudo bash up.sh
 ```
 
-<br>
 
 
 ## HOW TO CONNECT TO THE HOST VIA SSH
@@ -59,3 +58,8 @@ chmod 400 <private-key>
 ssh-add <private-key>
 ssh yapsh.tk
 ```
+
+
+
+## SEE THE API DOCUMENTATION ON SWAGGER
+Todo...
