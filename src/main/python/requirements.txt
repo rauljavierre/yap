@@ -1,8 +1,0 @@
-IN ORDER TO RUN PYTHON SCRIPT:
-
-sudo apt-get install python3
-sudo apt-get install pip
-sudo apt-get install python3-dev
-
-pip install pika
-pip install psutil

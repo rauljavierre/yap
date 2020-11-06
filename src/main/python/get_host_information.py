@@ -9,7 +9,6 @@ if __name__ == '__main__':
     channel = connection.channel()
 
     while True:
-
         # More metrics at: https://github.com/giampaolo/psutil
         channel.basic_publish(exchange='', routing_key='total-memory-queue', body=str(psutil.virtual_memory()[0]))
         channel.basic_publish(exchange='', routing_key='used-memory-queue', body=str(psutil.virtual_memory()[3]))

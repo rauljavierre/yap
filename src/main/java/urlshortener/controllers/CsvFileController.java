@@ -14,11 +14,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.http.MediaType;
 import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
-
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-
-//FOR QR
 
 
 @Controller

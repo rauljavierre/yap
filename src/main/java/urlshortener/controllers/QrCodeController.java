@@ -15,6 +15,7 @@ import java.net.URI;
 import java.io.IOException;
 import com.google.zxing.WriterException;
 
+
 @Controller
 @EnableSwagger2
 public class QrCodeController {
