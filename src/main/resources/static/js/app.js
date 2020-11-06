@@ -9,10 +9,12 @@ $(document).ready(
                     data: $(this).serialize(),
                     success: function (msg) {
                         $("#result").html(
-                            "<div class='alert alert-success lead'><a target='_blank' href='"
+                            "<div class='alert alert-danger lead'><a target='_blank' href='"
                             + "/r/"
                             + msg
                             + "'>"
+                            + window.location.href.replace('http://','')
+                            + "r/"
                             + msg
                             + "</a></div>");
                     },

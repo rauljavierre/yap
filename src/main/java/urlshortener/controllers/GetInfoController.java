@@ -15,6 +15,8 @@ import java.util.*;
 import java.util.concurrent.TimeoutException;
 import com.rabbitmq.client.Channel;
 
+import static java.lang.Thread.sleep;
+
 
 @Controller
 @EnableSwagger2
@@ -31,7 +33,7 @@ public class GetInfoController {
     private StringRedisTemplate constantsMap;
 
     @GetMapping("/get_info")
-    public ResponseEntity<HashMap<String, String>> getInfo() {
+    public ResponseEntity<HashMap<String, String>> getInfo() throws InterruptedException {
         HashMap<String, String> info = new HashMap<>();
 
         info.put("NumberOfGeneratedURLs", constantsMap.opsForValue().get("URLs"));
@@ -75,7 +77,8 @@ public class GetInfoController {
                     channelMap.put(key, c);
                     c.queueDeclare(key, false, false, false, args);
                 }
-            } catch (IOException | TimeoutException e) {
+                sleep(1000);    // wait until we have some data in the queue
+            } catch (IOException | TimeoutException | InterruptedException e) {
                 e.printStackTrace();
             }
         }

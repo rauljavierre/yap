@@ -40,6 +40,7 @@ public class QrCodeController {
         }
     }
 
+    /*
     @GetMapping(value="/qrTime")
     public ResponseEntity<String> qrTime(@RequestParam("url") String url) throws IOException, WriterException {
         boolean urlValid = UrlUtils.theURLisValid(url);
@@ -87,4 +88,5 @@ public class QrCodeController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
+     */
 }
