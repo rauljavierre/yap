@@ -10,12 +10,12 @@ fi
 
 
 cp ./build/libs/YapShortener.jar spring-docker
-sudo docker-compose up --build
+sudo docker-compose up --build --detach
 
-#pip3 install pika
-#pip3 install psutil
-#python3 src/main/python/get_host_information.py &
+pip3 install pika
+pip3 install psutil
+python3 src/main/python/get_host_information.py &
 
-#sleep 30
+sleep 60
 
-#sudo gradle sonarqube
+sudo gradle sonarqube
