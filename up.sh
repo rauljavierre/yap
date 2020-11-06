@@ -8,6 +8,14 @@ if [ $? -ne 0 ]; then
   exit
 fi
 
-cp ./build/libs/urlshortener.jar spring-docker
+
+cp ./build/libs/YapShortener.jar spring-docker
 sudo docker-compose up --build
-sudo bash down.sh
+
+#pip3 install pika
+#pip3 install psutil
+#python3 src/main/python/get_host_information.py &
+
+#sleep 30
+
+#sudo gradle sonarqube

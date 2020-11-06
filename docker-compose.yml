@@ -9,9 +9,13 @@ services:
       - db
 
   rabbitmq:
+    container_name: 'rabbitmq'
     build: rabbitmq
     ports:
       - ${RABBITMQ_HOST_PORT}:${RABBITMQ_CONTAINER_PORT}
+      - ${RABBITMQ_MANAGEMENT_HOST_PORT}:${RABBITMQ_MANAGEMENT_CONTAINER_PORT}
+    volumes:
+      - 'rabbitmq_data:/data'
 
   db:
     build: redis-docker
@@ -21,4 +25,7 @@ services:
   sonarqube:
     image: sonarqube:lts
     ports:
-      - 9000:9000
+      - ${SONARQUBE_HOST_PORT}:${SONARQUBE_CONTAINER_PORT}
+
+volumes:
+  rabbitmq_data:

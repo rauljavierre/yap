@@ -1,5 +1,7 @@
 package urlshortener.controllers;
 
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
 import urlshortener.utils.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -8,7 +10,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.TimeoutException;
+
 import com.rabbitmq.client.Channel;
 
 @Controller
@@ -28,28 +35,51 @@ public class GetInfoController {
     @GetMapping("/get_info")
     public ResponseEntity<HashMap<String, String>> getInfo() {
         HashMap<String, String> info = new HashMap<>();
-        RabbitMQUtils.initialize(this.channelMap,this.informationKeys);   // initialize connections with rabbitmq if needed
 
-        info.put("NumberOfGeneratedURLs", RabbitMQUtils.getNumberOf(constantsMap, "URLs"));
-        info.put("NumberOfGeneratedQRs", RabbitMQUtils.getNumberOf(constantsMap, "QRs"));
-        info.put("NumberOfGeneratedCSVs", RabbitMQUtils.getNumberOf(constantsMap, "CSVs"));
-        info.put("TotalMemory",  RabbitMQUtils.readFromRabbitMQ(this.channelMap,this.lastAvailableMap,
-                "total-memory-queue"));
-        info.put("UsedMemory",  RabbitMQUtils.readFromRabbitMQ(this.channelMap,this.lastAvailableMap,
-                "used-memory-queue"));
-        info.put("AvailableMemory",  RabbitMQUtils.readFromRabbitMQ(this.channelMap,this.lastAvailableMap,
-                "available-memory-queue"));
-        info.put("Platform",  RabbitMQUtils.readFromRabbitMQ(this.channelMap,this.lastAvailableMap,
-                "platform-queue"));
-        info.put("UsageOfCPU",  RabbitMQUtils.readFromRabbitMQ(this.channelMap,this.lastAvailableMap,
-                "cpu-used-queue"));
-        info.put("NumberOfCores",  RabbitMQUtils.readFromRabbitMQ(this.channelMap,this.lastAvailableMap,
-                "cpu-cores-queue"));
-        info.put("CPUFrequency",  RabbitMQUtils.readFromRabbitMQ(this.channelMap,this.lastAvailableMap,
-                "cpu-frequency-queue"));
-        info.put("BootTime", RabbitMQUtils.readFromRabbitMQ(this.channelMap,this.lastAvailableMap,
-                "boot-time-queue"));
+        info.put("NumberOfGeneratedURLs", constantsMap.opsForValue().get("URLs"));
+        info.put("NumberOfGeneratedQRs", constantsMap.opsForValue().get("QRs"));
+        info.put("NumberOfGeneratedCSVs", constantsMap.opsForValue().get("CSVs"));
+        info.put("TotalMemory", readFromRabbitMQ("total-memory-queue"));
+        info.put("UsedMemory", readFromRabbitMQ("used-memory-queue"));
+        info.put("AvailableMemory", readFromRabbitMQ("available-memory-queue"));
+        info.put("Platform", readFromRabbitMQ("platform-queue"));
+        info.put("UsageOfCPU", readFromRabbitMQ("cpu-used-queue"));
+        info.put("NumberOfCores", readFromRabbitMQ("cpu-cores-queue"));
+        info.put("CPUFrequency", readFromRabbitMQ("cpu-frequency-queue"));
+        info.put("BootTime", readFromRabbitMQ("boot-time-queue"));
+
         return new ResponseEntity<>(info, HttpStatus.OK);
     }
 
+    private String readFromRabbitMQ(String key) {
+        initialize();   // initialize connections with rabbitmq if needed
+        try {
+            String info = new String(channelMap.get(key).basicGet(key, false).getBody(), StandardCharsets.UTF_8);
+            lastAvailableMap.put(key, info);
+            return info;
+        }
+        catch (NullPointerException | IOException e){   // No updates | Connection Problems
+            return lastAvailableMap.get(key);
+        }
+    }
+
+    private void initialize() {
+        if(channelMap == null) {
+            ConnectionFactory factory = new ConnectionFactory();
+            factory.setHost("rabbitmq");
+            try {
+                channelMap = new HashMap<>();
+                Connection connection = factory.newConnection();
+                Map<String, Object> args = new HashMap<>();
+                args.put("x-max-length", 1);
+                for (String key : informationKeys) {
+                    Channel c = connection.createChannel();
+                    channelMap.put(key, c);
+                    c.queueDeclare(key, false, false, false, args);
+                }
+            } catch (IOException | TimeoutException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }
