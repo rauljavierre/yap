@@ -9,7 +9,7 @@ public class UrlUtils {
     // https://www.baeldung.com/java-check-url-exists
     public static boolean urlExists(String URLName){
         try {
-            URL url = new URL("http://www.example.com");
+            URL url = new URL(URLName);
             HttpURLConnection huc = (HttpURLConnection) url.openConnection();
             huc.setRequestMethod("HEAD");
 

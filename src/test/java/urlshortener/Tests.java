@@ -42,9 +42,9 @@ public class Tests {
 	@Autowired
 	private MockMvc mvc;
 
-	private static final String HTTP_EXAMPLE_COM = "http://example.com/";
-	private static final String NON_HTTP_EXAMPLE_COM = "non-http://example.com/";
-	private static final String HASH = "f684a3c4";
+	private static final String HTTP_EXAMPLE_COM = "https://www.google.es/";
+	private static final String NON_HTTP_EXAMPLE_COM = "non-https://www.google.es/";
+	private static final String HASH = "a9efeb44";
 	private static final String HASH_HTTP_EXAMPLE_COM = "http://localhost/link/"+HASH;
 
 

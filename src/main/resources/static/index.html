@@ -11,7 +11,8 @@
     <script src="webjars/bootstrap/3.3.5/js/bootstrap.min.js" type="text/javascript"></script>
 
     <!-- Our javascript requests:-->
-    <script src="js/app.js" type="text/javascript"></script>
+    <script src="js/generate_url.js" type="text/javascript"></script>
+    <script src="js/generate_csv.js" type="text/javascript"></script>
 
 </head>
 <body>
@@ -35,6 +36,15 @@
                 <br/>
                 <div id="result"/>
             </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12 text-center">
+            <form action="" enctype="multipart/form-data" id="csv-file">
+                Select a CSV file to upload:
+                <input type="file" name="file" accept="text/csv" style="margin: 0 auto">
+                <input type="submit" value="Upload file" name="submit">
+            </form>
         </div>
     </div>
 </div>
