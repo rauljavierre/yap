@@ -37,7 +37,6 @@ sudo apt-get install python3-dev
 
 ### Run the server
 ```
-cd ./docker
 sudo bash up.sh
 ```
 
