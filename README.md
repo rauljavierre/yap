@@ -1,7 +1,5 @@
 # YAP PLATFORM (URL SHORTENER) - Development
 
-<img src='https://github.com/rauljavierre/yap/blob/master/logo/logo-2150297.png' width='400'>
-
 
 
 ## HOW TO BUILD AND LAUNCH THE ENTIRE APPLICATION
