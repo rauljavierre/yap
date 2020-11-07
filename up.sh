@@ -16,6 +16,7 @@ sleep 30
 
 pip3 install pika
 pip3 install psutil
+pip3 install hurry.filesize
 python3 src/main/python/get_host_information.py &
 
 # sudo gradle sonarqube

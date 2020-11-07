@@ -44,6 +44,7 @@ public class Tests {
 
 	private static final String HTTP_EXAMPLE_COM = "https://www.google.es/";
 	private static final String NON_HTTP_EXAMPLE_COM = "non-https://www.google.es/";
+	private static final String NON_ACCESSIBLE_COM = "http://www.non-accessible-website-yap.com/";
 	private static final String HASH = "a9efeb44";
 	private static final String HASH_HTTP_EXAMPLE_COM = "http://localhost/link/"+HASH;
 
@@ -59,10 +60,19 @@ public class Tests {
 	}
 
 	@Test
-	public void testIfDoNotCreateAShortURLProvidingAnInvalidURL() throws Exception {
+	public void testIfDoNotCreateAShortURLProvidingAnInvalidURLProtocol() throws Exception {
 		given(stringRedisTemplate.opsForValue()).willReturn(valueOperations);
 		this.mvc.perform(post("/link")
 				.contentType(MediaType.APPLICATION_FORM_URLENCODED).param("url", NON_HTTP_EXAMPLE_COM)).
+				andDo(print()).
+				andExpect(status().isBadRequest());
+	}
+
+	@Test
+	public void testIfDoNotCreateAShortURLProvidingAnInaccessibleURL() throws Exception {
+		given(stringRedisTemplate.opsForValue()).willReturn(valueOperations);
+		this.mvc.perform(post("/link")
+				.contentType(MediaType.APPLICATION_FORM_URLENCODED).param("url", NON_ACCESSIBLE_COM)).
 				andDo(print()).
 				andExpect(status().isBadRequest());
 	}

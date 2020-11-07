@@ -33,12 +33,15 @@ public class GetInfoController {
     private StringRedisTemplate constantsMap;
 
     @GetMapping("/get_info")
-    public ResponseEntity<HashMap<String, String>> getInfo() throws InterruptedException {
+    public ResponseEntity<HashMap<String, String>> getInfo() {
         HashMap<String, String> info = new HashMap<>();
 
-        info.put("NumberOfGeneratedURLs", constantsMap.opsForValue().get("URLs"));
-        info.put("NumberOfGeneratedQRs", constantsMap.opsForValue().get("QRs"));
-        info.put("NumberOfGeneratedCSVs", constantsMap.opsForValue().get("CSVs"));
+        info.put("NumberOfGeneratedURLs",
+                (constantsMap.opsForValue().get("URLs") == null) ? "0" : constantsMap.opsForValue().get("URLs"));
+        info.put("NumberOfGeneratedQRs",
+                (constantsMap.opsForValue().get("QRs") == null) ? "0" : constantsMap.opsForValue().get("QRs"));
+        info.put("NumberOfGeneratedCSVs",
+                (constantsMap.opsForValue().get("CSVs") == null) ? "0" : constantsMap.opsForValue().get("CSVs"));
         info.put("TotalMemory", readFromRabbitMQ("total-memory-queue"));
         info.put("UsedMemory", readFromRabbitMQ("used-memory-queue"));
         info.put("AvailableMemory", readFromRabbitMQ("available-memory-queue"));
