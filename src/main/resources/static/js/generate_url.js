@@ -1,5 +1,6 @@
 $(document).ready(
     function () {
+        var urlShort;
         $("#shortener").submit(
             function (event) {
                 event.preventDefault();
@@ -9,7 +10,7 @@ $(document).ready(
                     data: $(this).serialize(),
                     success: function (msg) {
                         $("#result").html(
-                            "<div class='alert alert-danger lead' style=\"font-family: 'Open Sans'\"><a target='_blank' href='"
+                            "<div id=\"shortUrl\" class='alert alert-danger lead' style=\"font-family: 'Open Sans'\"><a target='_blank' href='"
                             + "/r/"
                             + msg
                             + "'>"
@@ -20,11 +21,39 @@ $(document).ready(
                             " </div>");
                         $("#copy-to-clipboard").html(
                             "<button type=\"button\" class=\"btn btn-danger\" onclick=\"copyToClipboard()\">Copy to clipboard &#128221;</button>");
+                        // Mostramos el boton
+                        var qrButton = document.getElementById("qrCode");
+                        if (qrButton.style.display === "none") {
+                            qrButton.style.display = "block";
+                        }
+                        urlShort = $('#shortUrl').text();
                     },
                     error: function () {
                         $("#result").html(
                             "<div class='alert alert-danger lead' style=\"font-family: 'Open Sans'\">Try with another URL... &#128532;</div>");
                         $("#copy-to-clipboard").html("");
+                    }
+                });
+            }
+        );
+
+        $("#qrGenerate").click(
+            function () {
+                $.ajax({
+                    type: "POST",
+                    url: "/qr",
+                    data: { url: urlShort },
+                    success: function(response) {
+                        //var image = $('qr_image');
+                        //image.attr("src","data:image/png;base64," + response );
+                        //$("#qrResult").html(
+                        //    "<img id=\"qr_image\" src=\"\" />" );
+                        $("#text1").html("<p>Prueba Codigo QR</p>");
+                    },
+                    error: function () {
+                      $("#qrResult").html(
+                          "<div class='alert alert-danger lead' style=\"font-family: 'Open Sans'\">Imposible generar QR +;</div>");
+                      $("#text1").html("<p>" + urlShort + "</p>");
                     }
                 });
             }
