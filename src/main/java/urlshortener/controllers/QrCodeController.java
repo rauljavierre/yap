@@ -7,7 +7,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.http.MediaType;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
@@ -23,9 +23,12 @@ public class QrCodeController {
     @Autowired
     private StringRedisTemplate constantsMap;
 
-    @GetMapping(value="/qr", produces = MediaType.IMAGE_JPEG_VALUE)
+    @PostMapping(value="/qr", produces = MediaType.IMAGE_JPEG_VALUE)
     public ResponseEntity<byte[]> qr(@RequestParam("url") String url) throws IOException,WriterException {
-        if (UrlUtils.theURLisValid(url)) {
+        // Para comprobar el local que el QR se genera con la URL acortada
+        String localhost = url.substring(0,9);
+        boolean isLocalHost = localhost.equals("localhost");
+        if (UrlUtils.theURLisValid(url) || isLocalHost) {
             URI initialURL = URI.create(url);
             byte[] response = QrCodeUtils.qrGeneratorLibrary(url);
             HttpHeaders responseHeaders = new HttpHeaders();

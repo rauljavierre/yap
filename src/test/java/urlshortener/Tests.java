@@ -98,7 +98,7 @@ public class Tests {
 	@Test
 	public void testIfItCanReturnAQRProvidingAValidURL() throws Exception {
 		given(stringRedisTemplate.opsForValue()).willReturn(valueOperations);
-		this.mvc.perform(get("/qr")
+		this.mvc.perform(post("/qr")
 				.contentType(MediaType.APPLICATION_FORM_URLENCODED).param("url", HTTP_EXAMPLE_COM)).
 				andDo(print()).
 				andExpect(status().isOk()).
@@ -108,7 +108,7 @@ public class Tests {
 	@Test
 	public void testIfItDoNotReturnAQRProvidingAnInvalidURL() throws Exception {
 		given(stringRedisTemplate.opsForValue()).willReturn(valueOperations);
-		this.mvc.perform(get("/qr")
+		this.mvc.perform(post("/qr")
 				.contentType(MediaType.APPLICATION_FORM_URLENCODED).param("url", NON_HTTP_EXAMPLE_COM)).
 				andDo(print()).
 				andExpect(status().isBadRequest());
