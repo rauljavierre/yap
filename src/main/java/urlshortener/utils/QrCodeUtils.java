@@ -1,6 +1,7 @@
 package urlshortener.utils;
 
 import java.io.*;
+import java.util.Base64;
 import java.net.URL;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -10,7 +11,6 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 
-import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 
 public class QrCodeUtils {
 
@@ -23,7 +23,7 @@ public class QrCodeUtils {
         ByteArrayOutputStream aux = new ByteArrayOutputStream();
         ImageIO.write(image, "png", aux);
         byte[] img = aux.toByteArray();
-        String imgBase64 = new String("data:image/png;base64," + Base64.encode(img));
+        String imgBase64 = new String(Base64.getEncoder().encode(img));
         return imgBase64;
     }
 

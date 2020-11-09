@@ -45,11 +45,11 @@ $(document).ready(
                     url: "/qr",
                     data: { url: urlShort },
                     success: function(response) {
-                         $("#qrImage").html("<img style='width:400px;height:400px;' src=" + response + " />");
+                        $('#qrImage').html('<img src="data:image/png;base64,'+response+'"/>');
                         $("#text1").html("<p>Prueba Codigo QR</p>");
                     },
                     error: function () {
-                      $("#qrResult").html(
+                      $("#qrImage").html(
                           "<div class='alert alert-danger lead' style=\"font-family: 'Open Sans'\">Imposible generar QR +;</div>");
                       $("#text1").html("<p>" + urlShort + "</p>");
                     }
