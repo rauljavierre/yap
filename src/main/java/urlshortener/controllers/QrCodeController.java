@@ -23,18 +23,17 @@ public class QrCodeController {
     @Autowired
     private StringRedisTemplate constantsMap;
 
-    @PostMapping(value="/qr", produces = MediaType.IMAGE_JPEG_VALUE)
-    public ResponseEntity<byte[]> qr(@RequestParam("url") String url) throws IOException,WriterException {
+    @PostMapping(value="/qr", produces = MediaType.IMAGE_PNG_VALUE)
+    public ResponseEntity<String> qr(@RequestParam("url") String url) throws IOException,WriterException {
         // Para comprobar el local que el QR se genera con la URL acortada
         String localhost = url.substring(0,9);
         boolean isLocalHost = localhost.equals("localhost");
         if (UrlUtils.theURLisValid(url) || isLocalHost) {
             URI initialURL = URI.create(url);
-            byte[] response = QrCodeUtils.qrGeneratorLibrary(url);
+            String response = QrCodeUtils.qrGeneratorLibrary(url);
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.setLocation(initialURL);
             responseHeaders.setContentType(MediaType.IMAGE_JPEG);
-            responseHeaders.setContentLength(response.length);
             constantsMap.opsForValue().increment("QRs");
             return new ResponseEntity<>(response,responseHeaders, HttpStatus.OK);
         }

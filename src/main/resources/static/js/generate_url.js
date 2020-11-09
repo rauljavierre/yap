@@ -27,6 +27,7 @@ $(document).ready(
                             qrButton.style.display = "block";
                         }
                         urlShort = $('#shortUrl').text();
+                        urlShort = encodeURIComponent(urlShort);
                     },
                     error: function () {
                         $("#result").html(
@@ -44,10 +45,7 @@ $(document).ready(
                     url: "/qr",
                     data: { url: urlShort },
                     success: function(response) {
-                        //var image = $('qr_image');
-                        //image.attr("src","data:image/png;base64," + response );
-                        //$("#qrResult").html(
-                        //    "<img id=\"qr_image\" src=\"\" />" );
+                         $("#qrImage").html("<img style='width:400px;height:400px;' src=" + response + " />");
                         $("#text1").html("<p>Prueba Codigo QR</p>");
                     },
                     error: function () {

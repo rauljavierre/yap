@@ -10,17 +10,21 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 
+import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
+
 public class QrCodeUtils {
 
     // Generates QR from url with library:
     // https://www.javadoc.io/doc/com.google.zxing/core/3.3.0/com/google/zxing/multi/qrcode/package-summary.html
-    public static byte[] qrGeneratorLibrary(String url) throws IOException, WriterException {
+    public static String qrGeneratorLibrary(String url) throws IOException, WriterException {
         QRCodeWriter qr = new QRCodeWriter();
         BitMatrix matrix = qr.encode(url, BarcodeFormat.QR_CODE,400,400);
         BufferedImage image = MatrixToImageWriter.toBufferedImage(matrix);
         ByteArrayOutputStream aux = new ByteArrayOutputStream();
-        ImageIO.write(image, "jpg", aux);
-        return aux.toByteArray();
+        ImageIO.write(image, "png", aux);
+        byte[] img = aux.toByteArray();
+        String imgBase64 = new String("data:image/png;base64," + Base64.encode(img));
+        return imgBase64;
     }
 
     // Generates QR from url with API:
