@@ -21,6 +21,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(App.class)
@@ -47,6 +50,24 @@ public class Tests {
 	private static final String NON_ACCESSIBLE_COM = "http://www.non-accessible-website-yap.com/";
 	private static final String HASH = "a9efeb44";
 	private static final String HASH_HTTP_EXAMPLE_COM = "http://localhost/link/"+HASH;
+	private static final MockMultipartFile CSV_FILE_VALID = new MockMultipartFile (
+                "file",
+            	"test.csv",
+            	MediaType.TEXT_PLAIN_VALUE,
+            	"https://www.unizar.es/,https://www.google.es/".getBytes()
+    );
+	private static final MockMultipartFile CSV_FILE_ONE_INVALID = new MockMultipartFile (
+                "file",
+            	"test2.csv",
+            	MediaType.TEXT_PLAIN_VALUE,
+            	"https://www.unizar.es/,https://www.google.es/,www.urlinexistente.com".getBytes()
+    );
+    private static final MockMultipartFile CSV_FILE_EMPTY = new MockMultipartFile (
+                    "file",
+                	"test3.csv",
+                	MediaType.TEXT_PLAIN_VALUE,
+                	"".getBytes()
+    );
 
 
 	@Test
@@ -135,5 +156,43 @@ public class Tests {
 				andExpect(jsonPath("$.NumberOfCores").isEmpty()).
 				andExpect(jsonPath("$.CPUFrequency").isEmpty()).
 				andExpect(jsonPath("$.BootTime").isEmpty());
+	}
+
+	@Test
+	public void testIfItCanShortACSVFileWithValidURLs() throws Exception {
+	    MockHttpServletRequestBuilder builder =
+            MockMvcRequestBuilders.multipart("/csv-file")
+                .file(CSV_FILE_VALID);
+	    given(stringRedisTemplate.opsForValue()).willReturn(valueOperations);
+    	given(valueOperations.get(HASH)).willReturn(HTTP_EXAMPLE_COM);
+	    this.mvc.perform(builder).
+            andDo(print()).
+            andExpect(status().isOk()).
+            andExpect(content().string("27338e97,a9efeb44"));
+	}
+
+	@Test
+	public void testIfItCanShortACSVFileWithInvalidURLs() throws Exception {
+	    MockHttpServletRequestBuilder builder =
+            MockMvcRequestBuilders.multipart("/csv-file")
+                .file(CSV_FILE_ONE_INVALID);
+	    given(stringRedisTemplate.opsForValue()).willReturn(valueOperations);
+    	given(valueOperations.get(HASH)).willReturn(HTTP_EXAMPLE_COM);
+	    this.mvc.perform(builder).
+            andDo(print()).
+            andExpect(status().isOk()).
+            andExpect(content().string("27338e97,a9efeb44,invalidURL"));
+	}
+
+	@Test
+	public void testIfItCanShortAnEmptyCSVFile() throws Exception {
+	    MockHttpServletRequestBuilder builder =
+            MockMvcRequestBuilders.multipart("/csv-file")
+                .file(CSV_FILE_EMPTY);
+	    given(stringRedisTemplate.opsForValue()).willReturn(valueOperations);
+    	given(valueOperations.get(HASH)).willReturn(HTTP_EXAMPLE_COM);
+	    this.mvc.perform(builder).
+            andDo(print()).
+            andExpect(status().isBadRequest());
 	}
 }

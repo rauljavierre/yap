@@ -50,21 +50,6 @@ public class CsvFileController {
             }
             // Generate CSV file with the short URL list
             try {
-                /*
-                TODO: Make this work
-                File f = new File("shortener.csv");
-                f.setReadable(true);
-                f.setWritable(true);
-                FileWriter csvWriter = new FileWriter(f);
-                for (int i = 0; i < shorURLs.size() - 1; ++i) {
-                    String newShortURL = shorURLs.get(i);
-                    csvWriter.append(newShortURL);
-                    csvWriter.append(",");
-                }
-                csvWriter.append(shorURLs.get(shorURLs.size()-1));
-                csvWriter.flush();
-                csvWriter.close();
-                 */
                 StringBuilder f = new StringBuilder();
                 for (int i = 0; i < shorURLs.size(); ++i) {
                     String newShortURL = shorURLs.get(i);
