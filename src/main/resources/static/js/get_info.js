@@ -26,8 +26,6 @@ function get_info() {
             );
             setTimeout(get_info, 1000);
         },
-        error: function () {
-            alert("Error polling host information")
-        }
+        error: function () {}
     });
 }

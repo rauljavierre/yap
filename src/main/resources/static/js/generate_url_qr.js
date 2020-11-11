@@ -21,8 +21,8 @@ $(document).ready(
                             " </div>");
                         $("#copy-to-clipboard").html(
                             "<button type=\"button\" class=\"btn btn-danger\" onclick=\"copyToClipboard()\">Copy to clipboard &#128221;</button>");
-                        // Mostramos el boton
-                        var qrButton = document.getElementById("qrCode");
+
+                        const qrButton = document.getElementById("qrCode");
                         if (qrButton.style.display === "none") {
                             qrButton.style.display = "block";
                         }
@@ -33,6 +33,11 @@ $(document).ready(
                         $("#result").html(
                             "<div class='alert alert-danger lead' style=\"font-family: 'Open Sans'\">Try with another URL... &#128532;</div>");
                         $("#copy-to-clipboard").html("");
+                        $("#qrImage").html("");
+                        $("#qrCode").html("");
+
+                        const qrButton = document.getElementById("qrCode");
+                        qrButton.style.display = "none";
                     }
                 });
             }
@@ -46,11 +51,10 @@ $(document).ready(
                     data: { url: urlShort },
                     success: function(response) {
                         $('#qrImage').html('<img src="data:image/png;base64,'+response+'"/>');
-                        $("#text1").html("<p>Prueba Codigo QR</p>");
                     },
                     error: function () {
                       $("#qrImage").html(
-                          "<div class='alert alert-danger lead' style=\"font-family: 'Open Sans'\">Imposible generar QR +;</div>");
+                          "<div class='alert alert-danger lead' style=\"font-family: 'Open Sans'\">We've found an error generating the QR... &#128532;</div>");
                       $("#text1").html("<p>" + urlShort + "</p>");
                     }
                 });

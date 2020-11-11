@@ -15,8 +15,6 @@ import java.util.*;
 import java.util.concurrent.TimeoutException;
 import com.rabbitmq.client.Channel;
 
-import static java.lang.Thread.sleep;
-
 
 @Controller
 @EnableSwagger2
@@ -71,8 +69,8 @@ public class GetInfoController {
             ConnectionFactory factory = new ConnectionFactory();
             factory.setHost("rabbitmq");
             try {
-                channelMap = new HashMap<>();
                 Connection connection = factory.newConnection();
+                channelMap = new HashMap<>();
                 Map<String, Object> args = new HashMap<>();
                 args.put("x-max-length", 1);
                 for (String key : informationKeys) {
@@ -80,8 +78,7 @@ public class GetInfoController {
                     channelMap.put(key, c);
                     c.queueDeclare(key, false, false, false, args);
                 }
-                sleep(1000);    // wait until we have some data in the queue
-            } catch (IOException | TimeoutException | InterruptedException e) {
+            } catch (IOException | TimeoutException e) {
                 e.printStackTrace();
             }
         }
