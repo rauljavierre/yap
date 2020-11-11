@@ -25,10 +25,8 @@ $(document).ready(
                         + filename
                         + "'>Download CSV file</a></div>");
                 }).fail(function(jqxhr,textStatus,errorThrown) {
-                    alert("Fallo en la peticion")
-                    console.log(jqxhr);
-                    console.log(textStatus);
-                    console.log(errorThrown);
+                    $("#csvResult").html(
+                            "<div class='alert alert-danger lead' style=\"font-family: 'Open Sans'\">The file can't be empty &#128532;</div>");
                 });
             }
         );
