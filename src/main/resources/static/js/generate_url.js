@@ -27,7 +27,7 @@ $(document).ready(
                             qrButton.style.display = "block";
                         }
                         urlShort = $('#shortUrl').text();
-                        urlShort = encodeURI(urlShort);
+                        urlShort = encodeURIComponent(urlShort);
                     },
                     error: function () {
                         $("#result").html(
