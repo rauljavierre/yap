@@ -160,6 +160,7 @@ public class Tests {
 
 	@Test
 	public void testIfItCanShortACSVFileWithValidURLs() throws Exception {
+	    given(stringRedisTemplate.opsForValue()).willReturn(valueOperations);
 	    MockHttpServletRequestBuilder builder =
             MockMvcRequestBuilders.multipart("/csv-file")
                 .file(CSV_FILE_VALID);
@@ -171,6 +172,7 @@ public class Tests {
 
 	@Test
 	public void testIfItCanShortACSVFileWithInvalidURLs() throws Exception {
+	    given(stringRedisTemplate.opsForValue()).willReturn(valueOperations);
 	    MockHttpServletRequestBuilder builder =
             MockMvcRequestBuilders.multipart("/csv-file")
                 .file(CSV_FILE_ONE_INVALID);
@@ -182,6 +184,7 @@ public class Tests {
 
 	@Test
 	public void testIfItCanShortAnEmptyCSVFile() throws Exception {
+	    given(stringRedisTemplate.opsForValue()).willReturn(valueOperations);
 	    MockHttpServletRequestBuilder builder =
             MockMvcRequestBuilders.multipart("/csv-file")
                 .file(CSV_FILE_EMPTY);
