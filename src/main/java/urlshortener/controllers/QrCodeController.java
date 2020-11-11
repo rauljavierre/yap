@@ -29,7 +29,7 @@ public class QrCodeController {
         // Para comprobar el local que el QR se genera con la URL acortada
         String localhost = url.substring(0,9);
         boolean isLocalHost = localhost.equals("localhost");
-        if (UrlUtils.theURLisValid(url) || isLocalHost) {
+        if (url.equals("")) {
             URI initialURL = URI.create(url);
             String response = QrCodeUtils.qrGeneratorLibrary(url);
             HttpHeaders responseHeaders = new HttpHeaders();
