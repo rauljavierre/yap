@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.http.MediaType;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 import java.net.URI;
+import java.net.URLDecoder;
 import java.io.IOException;
 import com.google.zxing.WriterException;
 
@@ -30,8 +31,9 @@ public class QrCodeController {
         String localhost = url.substring(0,9);
         boolean isLocalHost = localhost.equals("localhost");
         if (url.contains("http://yapsh.tk") || UrlUtils.theURLisValid(url) || isLocalHost) {
+            String urlOk = URLDecoder.decode(url, "UTF-8");
             URI initialURL = URI.create(url);
-            String response = QrCodeUtils.qrGeneratorLibrary(url);
+            String response = QrCodeUtils.qrGeneratorLibrary(urlOk);
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.setLocation(initialURL);
             responseHeaders.setContentType(MediaType.IMAGE_JPEG);
