@@ -163,12 +163,10 @@ public class Tests {
 	    MockHttpServletRequestBuilder builder =
             MockMvcRequestBuilders.multipart("/csv-file")
                 .file(CSV_FILE_VALID);
-	    given(stringRedisTemplate.opsForValue()).willReturn(valueOperations);
-    	given(valueOperations.get(HASH)).willReturn(HTTP_EXAMPLE_COM);
 	    this.mvc.perform(builder).
-            andDo(print()).
-            andExpect(status().isOk()).
-            andExpect(content().string("27338e97,a9efeb44"));
+		    andDo(print()).
+		    andExpect(status().isOk()).
+		    andExpect(content().string("27338e97,a9efeb44"));
 	}
 
 	@Test
@@ -176,12 +174,10 @@ public class Tests {
 	    MockHttpServletRequestBuilder builder =
             MockMvcRequestBuilders.multipart("/csv-file")
                 .file(CSV_FILE_ONE_INVALID);
-	    given(stringRedisTemplate.opsForValue()).willReturn(valueOperations);
-    	given(valueOperations.get(HASH)).willReturn(HTTP_EXAMPLE_COM);
 	    this.mvc.perform(builder).
-            andDo(print()).
-            andExpect(status().isOk()).
-            andExpect(content().string("27338e97,a9efeb44,invalidURL"));
+		    andDo(print()).
+		    andExpect(status().isOk()).
+		    andExpect(content().string("27338e97,a9efeb44,invalidURL"));
 	}
 
 	@Test
@@ -189,10 +185,8 @@ public class Tests {
 	    MockHttpServletRequestBuilder builder =
             MockMvcRequestBuilders.multipart("/csv-file")
                 .file(CSV_FILE_EMPTY);
-	    given(stringRedisTemplate.opsForValue()).willReturn(valueOperations);
-    	given(valueOperations.get(HASH)).willReturn(HTTP_EXAMPLE_COM);
 	    this.mvc.perform(builder).
-            andDo(print()).
-            andExpect(status().isBadRequest());
+            	andDo(print()).
+            	andExpect(status().isBadRequest());
 	}
 }
