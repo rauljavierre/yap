@@ -30,7 +30,7 @@ public class QrCodeController {
         // Para comprobar el local que el QR se genera con la URL acortada
         String localhost = url.substring(0,9);
         boolean isLocalHost = localhost.equals("localhost");
-        if (url.contains("http://yapsh.tk") || UrlUtils.theURLisValid(url) || isLocalHost) {
+        if (url.contains("yapsh.tk") || UrlUtils.theURLisValid(url) || isLocalHost) {
             String urlOk = URLDecoder.decode(url, "UTF-8");
             URI initialURL = URI.create(url);
             String response = QrCodeUtils.qrGeneratorLibrary(urlOk);
