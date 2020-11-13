@@ -16,7 +16,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 import javax.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-
+import urlshortener.services.UrlService;
 
 @Controller
 @EnableSwagger2
@@ -28,7 +28,12 @@ public class UrlShortenerController {
     @Autowired
     private StringRedisTemplate urlsMap;
 
-    /*
+    private final UrlService urlService;
+
+    public UrlShortenerController(UrlService urlService) {
+        this.urlService = urlService;
+    }
+
     @GetMapping("/r/{id:(?!link|index).*}")
     public ResponseEntity<Void> redirectTo(@PathVariable String id) {
         String key = urlsMap.opsForValue().get(id);
@@ -43,7 +48,8 @@ public class UrlShortenerController {
 
     @PostMapping("/link")
     public ResponseEntity<String> shortener(@RequestParam("url") String url, HttpServletRequest req) {
-        if (UrlUtils.theURLisValid(url)) {
+        String urlStatus = urlService.isValid(url);
+        if (urlStatus.equals("URL is OK")) {
             String id = Hashing.murmur3_32().hashString(url, StandardCharsets.UTF_8).toString();
             urlsMap.opsForValue().set(id, url);
             constantsMap.opsForValue().increment("URLs");
@@ -52,8 +58,8 @@ public class UrlShortenerController {
             responseHeaders.setLocation(location);
             return new ResponseEntity<>(id, responseHeaders, HttpStatus.CREATED);
         } else {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(urlStatus,HttpStatus.BAD_REQUEST);
         }
      }
-     */
+
 }

@@ -15,6 +15,7 @@ import java.net.URI;
 import java.net.URLDecoder;
 import java.io.IOException;
 import com.google.zxing.WriterException;
+import urlshortener.services.UrlService;
 
 
 
@@ -24,13 +25,20 @@ public class QrCodeController {
 
     @Autowired
     private StringRedisTemplate constantsMap;
-    /*
+
+    private final UrlService urlService;
+
+    public QrCodeController(UrlService urlService) {
+        this.urlService = urlService;
+    }
+
     @PostMapping(value="/qr", produces = MediaType.IMAGE_PNG_VALUE)
     public ResponseEntity<String> qr(@RequestParam("url") String url) throws IOException,WriterException {
         // Para comprobar el local que el QR se genera con la URL acortada
+        String urlStatus = urlService.isValid(url);
         String localhost = url.substring(0,9);
         boolean isLocalHost = localhost.equals("localhost");
-        if (url.contains("yapsh.tk") || UrlUtils.theURLisValid(url) || isLocalHost) {
+        if (url.contains("yapsh.tk") || urlStatus.equals("URL is OK") || isLocalHost) {
             String urlOk = URLDecoder.decode(url, "UTF-8");
             URI initialURL = URI.create(url);
             String response = QrCodeUtils.qrGeneratorLibrary(urlOk);
@@ -41,11 +49,11 @@ public class QrCodeController {
             return new ResponseEntity<>(response,responseHeaders, HttpStatus.OK);
         }
         else{
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(urlStatus,HttpStatus.BAD_REQUEST);
         }
     }
 
-
+    /*
     @GetMapping(value="/qrTime")
     public ResponseEntity<String> qrTime(@RequestParam("url") String url) throws IOException, WriterException {
         boolean urlValid = UrlUtils.theURLisValid(url);
