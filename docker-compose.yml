@@ -8,15 +8,6 @@ services:
     links:
       - db
 
-  rabbitmq:
-    container_name: 'rabbitmq'
-    build: rabbitmq
-    ports:
-      - ${RABBITMQ_HOST_PORT}:${RABBITMQ_CONTAINER_PORT}
-      - ${RABBITMQ_MANAGEMENT_HOST_PORT}:${RABBITMQ_MANAGEMENT_CONTAINER_PORT}
-    volumes:
-      - 'rabbitmq_data:/data'
-
   db:
     build: redis-docker
     ports:
@@ -26,6 +17,3 @@ services:
     image: sonarqube:lts
     ports:
       - ${SONARQUBE_HOST_PORT}:${SONARQUBE_CONTAINER_PORT}
-
-volumes:
-  rabbitmq_data:
