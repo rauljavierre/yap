@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import urlshortener.services.UrlService;
 
 
 @Controller
@@ -28,52 +29,48 @@ public class CsvFileController {
     @Autowired
     private StringRedisTemplate constantsMap;
 
+    private final UrlService urlService;
+
+    public CsvFileController(UrlService urlService) {
+        this.urlService = urlService;
+    }
+
     @PostMapping(value="/csv-file", produces="text/csv")
     public ResponseEntity<String> shortener(@RequestParam("file") MultipartFile file) {
         if(file.isEmpty()){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        // Parse file and get URL list
         List<String> longURLs = CsvUtils.getCSVUrls(file);
-        List<String> shorURLs = new ArrayList<>();
+        List<String> shortURLs = new ArrayList<>();
 
-        // Iterate the URL list
-        UrlValidator urlValidator = new UrlValidator(new String[]{"http", "https"});
         for (String currentURL : longURLs) {
-            // Validate current URL
-            if (currentURL != null && urlValidator.isValid(currentURL) && UrlUtils.urlExists(currentURL)) {
-                // Generate the short URL
+            String urlStatus = urlService.isValid(currentURL);
+
+            if(urlStatus.equals("URL is OK")) {
                 String id = Hashing.murmur3_32().hashString(currentURL, StandardCharsets.UTF_8).toString();
                 urlsMap.opsForValue().set(id, currentURL);
-                shorURLs.add(id);
+                shortURLs.add(id);
             }
             else {
-                shorURLs.add("invalidURL");
+                shortURLs.add(urlStatus);
             }
         }
 
-        // Generate CSV file with the short URL list
-        try {
-            StringBuilder f = new StringBuilder();
-            for (int i = 0; i < shorURLs.size(); ++i) {
-                String newShortURL = shorURLs.get(i);
-                f.append(newShortURL);
-                if (i != shorURLs.size() - 1) {
-                    f.append(",");
-                }
+        StringBuilder f = new StringBuilder();
+        for (int i = 0; i < shortURLs.size(); ++i) {
+            String newShortURL = shortURLs.get(i);
+            f.append(newShortURL);
+            if (i != shortURLs.size() - 1) {
+                f.append(",");
             }
-            // Generate ResponseEntity
-            HttpHeaders responseHeaders = new HttpHeaders();
-            responseHeaders.setContentType(MediaType.parseMediaType("text/csv"));
-            responseHeaders.setContentLength(f.length());
-            constantsMap.opsForValue().increment("CSVs");
+        }
 
-            return new ResponseEntity<>(f.toString(),responseHeaders,HttpStatus.OK);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.setContentType(MediaType.parseMediaType("text/csv"));
+        responseHeaders.setContentLength(f.length());
+        constantsMap.opsForValue().increment("CSVs");
+
+        return new ResponseEntity<>(f.toString(),responseHeaders,HttpStatus.OK);
     }
 }

@@ -14,7 +14,7 @@ fi
 cp ./build/libs/YapShortener.jar spring-docker
 
 echo "[up.sh] Tearing up containers"
-sudo docker-compose up --build --detach
+sudo docker-compose up --build
 
 sleep 60
 

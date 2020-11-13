@@ -28,6 +28,7 @@ public class UrlShortenerController {
     @Autowired
     private StringRedisTemplate urlsMap;
 
+    /*
     @GetMapping("/r/{id:(?!link|index).*}")
     public ResponseEntity<Void> redirectTo(@PathVariable String id) {
         String key = urlsMap.opsForValue().get(id);
@@ -53,5 +54,6 @@ public class UrlShortenerController {
         } else {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-    }
+     }
+     */
 }

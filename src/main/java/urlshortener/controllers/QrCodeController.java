@@ -24,7 +24,7 @@ public class QrCodeController {
 
     @Autowired
     private StringRedisTemplate constantsMap;
-
+    /*
     @PostMapping(value="/qr", produces = MediaType.IMAGE_PNG_VALUE)
     public ResponseEntity<String> qr(@RequestParam("url") String url) throws IOException,WriterException {
         // Para comprobar el local que el QR se genera con la URL acortada
@@ -45,7 +45,7 @@ public class QrCodeController {
         }
     }
 
-    /*
+
     @GetMapping(value="/qrTime")
     public ResponseEntity<String> qrTime(@RequestParam("url") String url) throws IOException, WriterException {
         boolean urlValid = UrlUtils.theURLisValid(url);
