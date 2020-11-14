@@ -38,9 +38,6 @@ dependencies {
     implementation 'io.springfox:springfox-swagger-ui:2.9.2'
     implementation 'org.apache.httpcomponents:httpclient'
 
-    // RabbitMQ
-    compile 'com.rabbitmq:amqp-client:5.10.0'
-
     // QR library
     // https://mvnrepository.com/artifact/com.google.zxing/javase
     compile group: 'com.google.zxing', name: 'javase', version: '3.3.0'
