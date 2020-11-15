@@ -15,7 +15,7 @@ public class GeneratedController {
     private StringRedisTemplate constantsMap;
 
     @ReadOperation
-    public HashMap<String, String> generated() {
+    public HashMap<String, String> getGenerated() {
         HashMap<String, String> response = new HashMap<>();
         response.put("URLs", constantsMap.opsForValue().get("URLs"));
         response.put("QRs", constantsMap.opsForValue().get("QRs"));
