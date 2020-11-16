@@ -20,13 +20,15 @@ public class InfoController {
 
     @ReadOperation
     public HashMap<String, String> getInfo() {
+        System.out.println("/actuators/info");
+
         HashMap<String, String> response = new HashMap<>();
         response.put("URLs", constantsMap.opsForValue().get("URLs"));
         response.put("QRs", constantsMap.opsForValue().get("QRs"));
         response.put("CSVs", constantsMap.opsForValue().get("CSVs"));
 
         // https://www.dokry.com/9118
-        response.put("timestamp", ZonedDateTime.now( ZoneOffset.UTC ).format(DateTimeFormatter.ISO_INSTANT));
+        response.put("timestamp", ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT));
 
         return response;
     }

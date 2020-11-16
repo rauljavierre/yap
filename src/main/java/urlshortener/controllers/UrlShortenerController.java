@@ -5,6 +5,7 @@ import org.json.simple.JSONObject;
 import com.google.common.hash.Hashing;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,7 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import urlshortener.services.QRService;
 import urlshortener.services.URLService;
@@ -31,9 +33,6 @@ public class UrlShortenerController {
 
     @Autowired
     private StringRedisTemplate urlsMap;
-
-    @Autowired
-    private StringRedisTemplate qrsMap;
 
     @Autowired
     private final URLService urlService;
@@ -70,11 +69,10 @@ public class UrlShortenerController {
         String urlLocation = req.getScheme() + "://" + req.getServerName() + "/" + hash;
         String qrLocation = req.getScheme() + "://" + req.getServerName() + "/qr/" + hash;
 
-        qrService.generateAndStoreQR(urlLocation, hash);
-
         JSONObject responseBody = new JSONObject();
         responseBody.put("url", urlLocation);
         if(generateQR) {
+            qrService.generateAndStoreQR(urlLocation, hash);
             responseBody.put("qr", qrLocation);
         }
 
@@ -89,6 +87,8 @@ public class UrlShortenerController {
 
             if(urlStatusResult.equals("URL is OK")){
                 urlService.insertURLIntoREDIS(hash, urlLocation, urlStatus);
+                CacheControl cacheControl = CacheControl.maxAge(60, TimeUnit.SECONDS).noTransform().mustRevalidate();
+                responseHeaders.setCacheControl(cacheControl.toString());
                 return new ResponseEntity<>(responseBody, responseHeaders, HttpStatus.CREATED);
             }
             else {

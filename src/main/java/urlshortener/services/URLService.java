@@ -9,8 +9,10 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -26,21 +28,26 @@ public class URLService {
     private StringRedisTemplate urlsMap;
 
     @Async
-    public Future<String> isValid(String URL) {
-        if(URL == null) {
+    public Future<String> isValid(String url) {
+        if(url == null) {
             return new AsyncResult<>("URL is null");
         }
-        if(!(URL.startsWith("http") || URL.startsWith("https"))){
+        if(!(url.startsWith("http") || url.startsWith("https"))){
             return new AsyncResult<>("URL is malformed");
         }
 
-        HttpComponentsClientHttpRequestFactory httpClient = new HttpComponentsClientHttpRequestFactory();
+        HttpURLConnection urlConnection;
         try {
-            ClientHttpRequest request = httpClient.createRequest(new URI(URL), HttpMethod.HEAD);
-            request.execute();
-            return new AsyncResult<>("URL is OK");
+            urlConnection = (HttpURLConnection) new URL(url).openConnection();
+            urlConnection.setRequestMethod("HEAD");
+            if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                return new AsyncResult<>("URL is OK");
+            }
+            else {
+                return new AsyncResult<>("URL not reachable");
+            }
         }
-        catch (URISyntaxException | IOException e){
+        catch (IOException e){
             return new AsyncResult<>("URL not reachable");
         }
     }

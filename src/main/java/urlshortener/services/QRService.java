@@ -20,14 +20,19 @@ public class QRService {
     @Autowired
     private StringRedisTemplate qrsMap;
 
+    @Autowired
+    private StringRedisTemplate constantsMap;
+
     // Generates QR from url with library:
     // https://www.javadoc.io/doc/com.google.zxing/core/3.3.0/com/google/zxing/multi/qrcode/package-summary.html
-    public static byte[] qrGeneratorLibrary(String url) throws IOException, WriterException {
+    public byte[] qrGeneratorLibrary(String url) throws IOException, WriterException {
         QRCodeWriter qr = new QRCodeWriter();
         BitMatrix matrix = qr.encode(url, BarcodeFormat.QR_CODE,400,400);
         BufferedImage image = MatrixToImageWriter.toBufferedImage(matrix);
         ByteArrayOutputStream aux = new ByteArrayOutputStream();
         ImageIO.write(image, "png", aux);
+        constantsMap.opsForValue().increment("QRs");
+
         return aux.toByteArray();
     }
 
@@ -35,6 +40,7 @@ public class QRService {
     public byte[] generateAndStoreQR(String url, String hash) throws IOException, WriterException {
         byte[] qrBase64 = qrGeneratorLibrary(url);
         qrsMap.opsForValue().set(hash, qrBase64.toString());
+
         return qrBase64;
     }
 }
