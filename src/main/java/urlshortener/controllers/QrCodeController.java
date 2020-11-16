@@ -2,6 +2,8 @@ package urlshortener.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import urlshortener.utils.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -14,9 +16,12 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+
 import com.google.zxing.WriterException;
 import urlshortener.services.UrlService;
 
+import javax.servlet.http.HttpServletRequest;
 
 
 @Controller
@@ -26,80 +31,25 @@ public class QrCodeController {
     @Autowired
     private StringRedisTemplate constantsMap;
 
-    private final UrlService urlService;
+    @Autowired
+    private StringRedisTemplate urlsMap;
 
-    public QrCodeController(UrlService urlService) {
-        this.urlService = urlService;
-    }
+    @GetMapping("/qr/{hash}")
+    public ResponseEntity<byte[]> qr(@PathVariable String hash,
+                                     HttpServletRequest req) throws IOException,WriterException {
 
-    @PostMapping(value="/qr", produces = MediaType.IMAGE_PNG_VALUE)
-    public ResponseEntity<String> qr(@RequestParam("url") String url) throws IOException,WriterException {
-        // Para comprobar el local que el QR se genera con la URL acortada
-        String urlStatus = urlService.isValid(url);
-        String localhost = url.substring(0,9);
-        boolean isLocalHost = localhost.equals("localhost");
-        if (url.contains("yapsh.tk") || urlStatus.equals("URL is OK") || isLocalHost) {
-            String urlOk = URLDecoder.decode(url, "UTF-8");
-            URI initialURL = URI.create(url);
-            String response = QrCodeUtils.qrGeneratorLibrary(urlOk);
-            HttpHeaders responseHeaders = new HttpHeaders();
-            responseHeaders.setLocation(initialURL);
-            responseHeaders.setContentType(MediaType.IMAGE_JPEG);
-            constantsMap.opsForValue().increment("QRs");
-            return new ResponseEntity<>(response,responseHeaders, HttpStatus.OK);
+        if (urlsMap.opsForValue().get(hash) == null){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        else{
-            return new ResponseEntity<>(urlStatus,HttpStatus.BAD_REQUEST);
-        }
-    }
 
-    /*
-    @GetMapping(value="/qrTime")
-    public ResponseEntity<String> qrTime(@RequestParam("url") String url) throws IOException, WriterException {
-        boolean urlValid = UrlUtils.theURLisValid(url);
-        if (urlValid) {
-            long t = System.currentTimeMillis();
-            QrCodeUtils.qrGeneratorLibrary(url);
-            t = System.currentTimeMillis() - t;
-            String r = Long.toString(t);
-            constantsMap.opsForValue().increment("QRs");
-            return new ResponseEntity<>(r, HttpStatus.OK);
-        }
-        else{
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-    }
+        URI url = URI.create(req.getScheme() + "://" + req.getServerName() + "/" + hash);
+        byte[] responseBody = QrCodeUtils.qrGeneratorLibrary(url.toString());
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.setLocation(url);
+        responseHeaders.setContentType(MediaType.IMAGE_JPEG);
 
-    @GetMapping(value="/qrAPI", produces = MediaType.IMAGE_JPEG_VALUE)
-    public ResponseEntity<byte[]> qrAPI(@RequestParam("url") String url) throws IOException{
-        boolean urlValid = UrlUtils.theURLisValid(url);
-        if (urlValid) {
-            byte[] response = QrCodeUtils.qrGeneratorAPI(url);
-            HttpHeaders responseHeaders = new HttpHeaders();
-            responseHeaders.setContentType(MediaType.IMAGE_JPEG);
-            responseHeaders.setContentLength(response.length);
-            constantsMap.opsForValue().increment("QRs");
-            return new ResponseEntity<>(response,responseHeaders, HttpStatus.OK);
-        }
-        else{
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-    }
+        constantsMap.opsForValue().increment("QRs");
 
-    @GetMapping(value="/qrAPITime")
-    public ResponseEntity<String> qrAPITime(@RequestParam("url") String url) throws IOException{
-        boolean urlValid = UrlUtils.theURLisValid(url);
-        if (urlValid) {
-            long t = System.currentTimeMillis();
-            QrCodeUtils.qrGeneratorAPI(url);
-            t = System.currentTimeMillis() - t;
-            String r = Long.toString(t);
-            constantsMap.opsForValue().increment("QRs");
-            return new ResponseEntity<>(r, HttpStatus.OK);
-        }
-        else{
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+        return new ResponseEntity<>(responseBody, responseHeaders, HttpStatus.OK);
     }
-     */
 }

@@ -1,6 +1,6 @@
 package urlshortener.controllers;
 
-import urlshortener.utils.*;
+import org.json.simple.JSONObject;
 import com.google.common.hash.Hashing;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -34,31 +34,48 @@ public class UrlShortenerController {
         this.urlService = urlService;
     }
 
-    @GetMapping("/r/{id:(?!link|index).*}")
-    public ResponseEntity<Void> redirectTo(@PathVariable String id) {
-        String key = urlsMap.opsForValue().get(id);
-        if (key != null) {
-            HttpHeaders responseHeaders = new HttpHeaders();
-            responseHeaders.setLocation(URI.create(key));
-            return new ResponseEntity<>(responseHeaders, HttpStatus.TEMPORARY_REDIRECT);
-        } else {
+    @GetMapping("{hash}")
+    public ResponseEntity<Void> redirectTo(@PathVariable String hash) {
+        String url = urlsMap.opsForValue().get(hash);
+        if (url == null){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.setLocation(URI.create(url));
+        return new ResponseEntity<>(responseHeaders, HttpStatus.TEMPORARY_REDIRECT);
     }
 
     @PostMapping("/link")
-    public ResponseEntity<String> shortener(@RequestParam("url") String url, HttpServletRequest req) {
+    public ResponseEntity<JSONObject> shortener(@RequestParam("url") String url,
+                                            @RequestParam("generateQR") boolean generateQR,
+                                            HttpServletRequest req) {
+
+        // TODO: always returning 201????? And if it was created before?
         String urlStatus = urlService.isValid(url);
         if (urlStatus.equals("URL is OK")) {
-            String id = Hashing.murmur3_32().hashString(url, StandardCharsets.UTF_8).toString();
-            urlsMap.opsForValue().set(id, url);
+            String hash = Hashing.murmur3_32().hashString(url, StandardCharsets.UTF_8).toString();
+            String urlLocation = req.getScheme() + "://" + req.getServerName() + "/" + hash;
+            String qrLocation = req.getScheme() + "://" + req.getServerName() + "/qr/" + hash;
+
+            JSONObject responseBody = new JSONObject();
+            responseBody.put("url", urlLocation);
+            if(generateQR) {
+                responseBody.put("qr", qrLocation);
+            }
+
+            urlsMap.opsForValue().set(hash, url);
             constantsMap.opsForValue().increment("URLs");
-            URI location = URI.create(req.getRequestURL().append("/").append(id).toString());
+
             HttpHeaders responseHeaders = new HttpHeaders();
-            responseHeaders.setLocation(location);
-            return new ResponseEntity<>(id, responseHeaders, HttpStatus.CREATED);
-        } else {
-            return new ResponseEntity<>(urlStatus,HttpStatus.BAD_REQUEST);
+            responseHeaders.setLocation(URI.create(urlLocation));
+
+            return new ResponseEntity<>(responseBody, responseHeaders, HttpStatus.CREATED);
+        }
+        else {
+            JSONObject responseBody = new JSONObject();
+            responseBody.put("error", urlStatus);
+            return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
         }
      }
 

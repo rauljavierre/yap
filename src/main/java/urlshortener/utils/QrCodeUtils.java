@@ -16,15 +16,13 @@ public class QrCodeUtils {
 
     // Generates QR from url with library:
     // https://www.javadoc.io/doc/com.google.zxing/core/3.3.0/com/google/zxing/multi/qrcode/package-summary.html
-    public static String qrGeneratorLibrary(String url) throws IOException, WriterException {
+    public static byte[] qrGeneratorLibrary(String url) throws IOException, WriterException {
         QRCodeWriter qr = new QRCodeWriter();
         BitMatrix matrix = qr.encode(url, BarcodeFormat.QR_CODE,400,400);
         BufferedImage image = MatrixToImageWriter.toBufferedImage(matrix);
         ByteArrayOutputStream aux = new ByteArrayOutputStream();
         ImageIO.write(image, "png", aux);
-        byte[] img = aux.toByteArray();
-        String imgBase64 = new String(Base64.getEncoder().encode(img));
-        return imgBase64;
+        return aux.toByteArray();
     }
 
     // Generates QR from url with API:
