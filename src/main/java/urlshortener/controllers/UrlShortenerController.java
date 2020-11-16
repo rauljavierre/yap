@@ -7,6 +7,8 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,18 +18,22 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 import javax.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeoutException;
+
 import urlshortener.services.UrlService;
+
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 @Controller
 @EnableSwagger2
 public class UrlShortenerController {
 
     @Autowired
-    private StringRedisTemplate constantsMap;
-
-    @Autowired
     private StringRedisTemplate urlsMap;
 
+    @Autowired
     private final UrlService urlService;
 
     public UrlShortenerController(UrlService urlService) {
@@ -52,31 +58,41 @@ public class UrlShortenerController {
                                             HttpServletRequest req) {
 
         // TODO: always returning 201????? And if it was created before?
-        String urlStatus = urlService.isValid(url);
-        if (urlStatus.equals("URL is OK")) {
-            String hash = Hashing.murmur3_32().hashString(url, StandardCharsets.UTF_8).toString();
-            String urlLocation = req.getScheme() + "://" + req.getServerName() + "/" + hash;
-            String qrLocation = req.getScheme() + "://" + req.getServerName() + "/qr/" + hash;
+        Future<String> urlStatus = urlService.isValid(url);
+        String hash = Hashing.murmur3_32().hashString(url, StandardCharsets.UTF_8).toString();
+        String urlLocation = req.getScheme() + "://" + req.getServerName() + "/" + hash;
+        String qrLocation = req.getScheme() + "://" + req.getServerName() + "/qr/" + hash;
 
-            JSONObject responseBody = new JSONObject();
-            responseBody.put("url", urlLocation);
-            if(generateQR) {
-                responseBody.put("qr", qrLocation);
-            }
-
-            urlsMap.opsForValue().set(hash, url);
-            constantsMap.opsForValue().increment("URLs");
-
-            HttpHeaders responseHeaders = new HttpHeaders();
-            responseHeaders.setLocation(URI.create(urlLocation));
-
-            return new ResponseEntity<>(responseBody, responseHeaders, HttpStatus.CREATED);
+        JSONObject responseBody = new JSONObject();
+        responseBody.put("url", urlLocation);
+        if(generateQR) {
+            responseBody.put("qr", qrLocation);
         }
-        else {
-            JSONObject responseBody = new JSONObject();
-            responseBody.put("error", urlStatus);
+
+        return buildResponseEntity(urlStatus, urlLocation, responseBody, hash);
+    }
+
+    private ResponseEntity<JSONObject> buildResponseEntity(Future<String> urlStatus, String urlLocation, JSONObject responseBody, String hash) {
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.setLocation(URI.create(urlLocation));
+        try {
+            String urlStatusResult = urlStatus.get(1500, MILLISECONDS);
+
+            if(urlStatusResult.equals("URL is OK")){
+                urlService.insertURLIntoREDIS(hash, urlLocation, urlStatus);
+                return new ResponseEntity<>(responseBody, responseHeaders, HttpStatus.CREATED);
+            }
+            else {
+                responseBody = new JSONObject();
+                responseBody.put("error", urlStatusResult);
+                return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+            }
+        }
+        catch (TimeoutException | InterruptedException | ExecutionException e) {
+            urlService.insertURLIntoREDIS(hash, urlLocation, urlStatus);
+            responseBody = new JSONObject();
+            responseBody.put("error", "URL not reachable");
             return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
         }
-     }
-
+    }
 }

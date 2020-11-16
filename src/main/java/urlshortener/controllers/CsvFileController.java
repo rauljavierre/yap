@@ -16,6 +16,8 @@ import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.Future;
+
 import urlshortener.services.UrlService;
 
 
@@ -37,6 +39,8 @@ public class CsvFileController {
 
     @PostMapping(value="/csv-file", produces="text/csv")
     public ResponseEntity<String> shortener(@RequestParam("file") MultipartFile file) {
+        // TODO: test with future<String>...
+    /*
         if(file.isEmpty()){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
@@ -49,7 +53,7 @@ public class CsvFileController {
 
             if(urlStatus.equals("URL is OK")) {
                 String id = Hashing.murmur3_32().hashString(currentURL, StandardCharsets.UTF_8).toString();
-                urlsMap.opsForValue().set(id, currentURL);
+                urlsMap.opsForValue().set(id.toString(), currentURL);
                 shortURLs.add(id);
             }
             else {
@@ -72,5 +76,8 @@ public class CsvFileController {
         constantsMap.opsForValue().increment("CSVs");
 
         return new ResponseEntity<>(f.toString(),responseHeaders,HttpStatus.OK);
+
+     */
+        return new ResponseEntity<>(new String(), HttpStatus.OK);
     }
 }
