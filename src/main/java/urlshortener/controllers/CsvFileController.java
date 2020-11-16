@@ -1,24 +1,16 @@
 package urlshortener.controllers;
 
-import urlshortener.utils.*;
-import com.google.common.hash.Hashing;
-import org.apache.commons.validator.routines.UrlValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.http.MediaType;
 import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.concurrent.Future;
 
-import urlshortener.services.UrlService;
+import urlshortener.services.URLService;
 
 
 @Controller
@@ -31,9 +23,9 @@ public class CsvFileController {
     @Autowired
     private StringRedisTemplate constantsMap;
 
-    private final UrlService urlService;
+    private final URLService urlService;
 
-    public CsvFileController(UrlService urlService) {
+    public CsvFileController(URLService urlService) {
         this.urlService = urlService;
     }
 
