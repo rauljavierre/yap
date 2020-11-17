@@ -28,19 +28,10 @@ sudo apt-get install docker-compose
 sudo snap install gradle --classic
 ```
 
-### Install python3 and dependencies
-```
-sudo apt-get install python3
-sudo apt install python3-pip
-sudo apt-get install python3-dev
-```
-
 ### Run the server
 ```
 sudo bash up.sh
 ```
-
-
 
 ## HOW TO CONNECT TO THE HOST VIA SSH
 
@@ -52,8 +43,3 @@ chmod 400 <private-key>
 ssh-add <private-key>
 ssh yapsh.tk
 ```
-
-
-
-## SEE THE API DOCUMENTATION ON SWAGGER
-http://yapsh.tk/swagger-ui.html
