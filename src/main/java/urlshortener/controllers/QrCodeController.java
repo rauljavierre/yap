@@ -12,46 +12,44 @@ import java.net.URI;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.codec.binary.Base64;
+import java.util.Base64;
 import com.google.zxing.WriterException;
+import urlshortener.services.URLService;
+
 import javax.servlet.http.HttpServletRequest;
 
 @Controller
 @EnableSwagger2
 public class QrCodeController {
 
-    /*
-    <"124891724", "http://airezico.tk">
-    <"qr124891724", base64>
-    <URLs, "3">
-     */
-    @Autowired
-    private StringRedisTemplate map;
-
-    public QrCodeController(QRService qrService) {
+    public QrCodeController(QRService qrService, URLService urlService) {
         this.qrService = qrService;
+        this.urlService = urlService;
     }
 
     @Autowired
     private final QRService qrService;
 
+    @Autowired
+    private final URLService urlService;
+
     @GetMapping("/qr/{hash}")
     public ResponseEntity<byte[]> qr(@PathVariable String hash,
                                      HttpServletRequest req) throws IOException, WriterException {
 
-        if (map.opsForValue().get(hash) == null){
+        if (!urlService.urlExists(hash)){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
         URI url = URI.create(req.getScheme() + "://" + req.getServerName() + "/" + hash);
 
-        byte[] qrBase64 = null;
-        if(map.opsForValue().get("qr" + hash) != null) {
-            qrBase64 = Base64.decodeBase64(map.opsForValue().get("qr" + hash).getBytes());
+        byte[] qrBase64;
+        if(qrService.qrExists(hash)) {
+            qrBase64 = qrService.getQR(hash);
             System.out.println("QR was generated before");
         }
         else {
-            qrBase64 = qrService.qrGeneratorLibrary(url.toString());
+            qrBase64 = qrService.generateAndStoreQR(url.toString(), hash);
             System.out.println("QR was not generated before");
         }
 

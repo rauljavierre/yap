@@ -47,11 +47,11 @@ public class UrlShortenerController {
 
     @GetMapping("{hash}")
     public ResponseEntity<Void> redirectTo(@PathVariable String hash) {
-        String url = map.opsForValue().get(hash);
-        if (url == null){
+        if (!urlService.urlExists(hash)){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
+        String url = urlService.getUrl(hash);
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.setLocation(URI.create(url));
 
@@ -71,7 +71,7 @@ public class UrlShortenerController {
 
         JSONObject responseBody = new JSONObject();
         responseBody.put("url", urlLocation);
-        if(generateQR) {
+        if(generateQR && !qrService.qrExists(hash)) {
             qrService.generateAndStoreQR(urlLocation, hash);
             String qrLocation = req.getScheme() + "://" + req.getServerName() + "/qr/" + hash;
             responseBody.put("qr", qrLocation);

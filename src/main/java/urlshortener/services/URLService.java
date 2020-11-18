@@ -21,6 +21,11 @@ import java.util.concurrent.TimeoutException;
 @Service
 public class URLService {
 
+    /*
+    <"124891724", "http://airezico.tk">
+    <"qr124891724", base64>
+    <URLs, "3">
+     */
     @Autowired
     private StringRedisTemplate map;
 
@@ -64,5 +69,13 @@ public class URLService {
         catch (TimeoutException | InterruptedException | ExecutionException e) {
             System.out.println("Not inserting " + url + " because it is not responding");
         }
+    }
+
+    public boolean urlExists(String hash) {
+        return map.opsForValue().get(hash) != null;
+    }
+
+    public String getUrl(String hash) {
+        return map.opsForValue().get(hash);
     }
 }

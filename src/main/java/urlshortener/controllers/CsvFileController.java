@@ -35,6 +35,7 @@ public class CsvFileController {
     @Autowired
     private StringRedisTemplate map;
 
+    @Autowired
     private final URLService urlService;
 
     public CsvFileController(URLService urlService) {

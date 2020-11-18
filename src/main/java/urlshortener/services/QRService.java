@@ -3,7 +3,6 @@ package urlshortener.services;
 import java.io.*;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.util.Arrays;
 import java.util.Base64;
 
 import com.google.zxing.common.BitMatrix;
@@ -20,6 +19,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class QRService {
 
+    /*
+    <"124891724", "http://airezico.tk">
+    <"qr124891724", base64>
+    <URLs, "3">
+     */
     @Autowired
     private StringRedisTemplate map;
 
@@ -43,5 +47,13 @@ public class QRService {
         map.opsForValue().set("qr" + hash, imgBase64);
 
         return qrBase64;
+    }
+
+    public boolean qrExists(String hash) {
+        return map.opsForValue().get("qr" + hash) != null;
+    }
+
+    public byte[] getQR(String hash) {
+        return Base64.getDecoder().decode(map.opsForValue().get("qr" + hash).getBytes());
     }
 }
