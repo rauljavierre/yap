@@ -22,10 +22,7 @@ import java.util.concurrent.TimeoutException;
 public class URLService {
 
     @Autowired
-    private StringRedisTemplate constantsMap;
-
-    @Autowired
-    private StringRedisTemplate urlsMap;
+    private StringRedisTemplate map;
 
     @Async
     public Future<String> isValid(String url) {
@@ -57,8 +54,11 @@ public class URLService {
         try {
             String status = urlStatus.get(10, TimeUnit.SECONDS);
             if (status.equals("URL is OK")) {
-                urlsMap.opsForValue().set(hash, url);
-                constantsMap.opsForValue().increment("URLs");
+                map.opsForValue().set(hash, url);
+                map.opsForValue().increment("URLs");
+            }
+            else {
+                System.out.println("Not inserting " + url + " because " + status);
             }
         }
         catch (TimeoutException | InterruptedException | ExecutionException e) {

@@ -32,7 +32,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 public class UrlShortenerController {
 
     @Autowired
-    private StringRedisTemplate urlsMap;
+    private StringRedisTemplate map;
 
     @Autowired
     private final URLService urlService;
@@ -47,13 +47,14 @@ public class UrlShortenerController {
 
     @GetMapping("{hash}")
     public ResponseEntity<Void> redirectTo(@PathVariable String hash) {
-        String url = urlsMap.opsForValue().get(hash);
+        String url = map.opsForValue().get(hash);
         if (url == null){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.setLocation(URI.create(url));
+
         return new ResponseEntity<>(responseHeaders, HttpStatus.TEMPORARY_REDIRECT);
     }
 
@@ -67,41 +68,22 @@ public class UrlShortenerController {
 
         String hash = Hashing.murmur3_32().hashString(url, StandardCharsets.UTF_8).toString();
         String urlLocation = req.getScheme() + "://" + req.getServerName() + "/" + hash;
-        String qrLocation = req.getScheme() + "://" + req.getServerName() + "/qr/" + hash;
 
         JSONObject responseBody = new JSONObject();
         responseBody.put("url", urlLocation);
         if(generateQR) {
             qrService.generateAndStoreQR(urlLocation, hash);
+            String qrLocation = req.getScheme() + "://" + req.getServerName() + "/qr/" + hash;
             responseBody.put("qr", qrLocation);
         }
 
-        return buildResponseEntity(urlStatus, urlLocation, responseBody, hash);
-    }
-
-    private ResponseEntity<JSONObject> buildResponseEntity(Future<String> urlStatus, String urlLocation, JSONObject responseBody, String hash) {
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.setLocation(URI.create(urlLocation));
-        try {
-            String urlStatusResult = urlStatus.get(1500, MILLISECONDS);
+        urlService.insertURLIntoREDIS(hash, url, urlStatus);
+        CacheControl cacheControl = CacheControl.maxAge(60, TimeUnit.SECONDS).noTransform().mustRevalidate();
+        responseHeaders.setCacheControl(cacheControl.toString());
 
-            if(urlStatusResult.equals("URL is OK")){
-                urlService.insertURLIntoREDIS(hash, urlLocation, urlStatus);
-                CacheControl cacheControl = CacheControl.maxAge(60, TimeUnit.SECONDS).noTransform().mustRevalidate();
-                responseHeaders.setCacheControl(cacheControl.toString());
-                return new ResponseEntity<>(responseBody, responseHeaders, HttpStatus.CREATED);
-            }
-            else {
-                responseBody = new JSONObject();
-                responseBody.put("error", urlStatusResult);
-                return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
-            }
-        }
-        catch (TimeoutException | InterruptedException | ExecutionException e) {
-            urlService.insertURLIntoREDIS(hash, urlLocation, urlStatus);
-            responseBody = new JSONObject();
-            responseBody.put("error", "URL not reachable");
-            return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
-        }
+        // TODO: ask Pellicer 400 error -> scalability/functionality
+        return new ResponseEntity<>(responseBody, responseHeaders, HttpStatus.CREATED);
     }
 }
