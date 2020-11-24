@@ -1,5 +1,6 @@
 package urlshortener.services;
 
+import com.google.common.hash.Hashing;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpMethod;
@@ -13,6 +14,7 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -34,7 +36,7 @@ public class URLService {
         if(url == null) {
             return new AsyncResult<>("URL is null");
         }
-        if(!(url.startsWith("http") || url.startsWith("https"))){
+        if(!(url.startsWith("http://") || url.startsWith("https://"))){
             return new AsyncResult<>("URL is malformed");
         }
 
@@ -69,6 +71,10 @@ public class URLService {
         catch (TimeoutException | InterruptedException | ExecutionException e) {
             System.out.println("Not inserting " + url + " because it is not responding");
         }
+    }
+
+    public String generateHashFromURL(String url) {
+        return Hashing.murmur3_32().hashString(url, StandardCharsets.UTF_8).toString();
     }
 
     public boolean urlExists(String hash) {

@@ -21,7 +21,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 @Service
 public class CSVService {
 
-    private String SCHEME_HOST = "http://yapsh.tk/";
+    private String SCHEME_HOST = "http://localhost/";
     Logger logger = Logger.getLogger(CSVService.class.getName());
 
     @Autowired
@@ -31,27 +31,42 @@ public class CSVService {
         this.urlService = urlService;
     }
 
-    @Async
-    public String generateCSVLine(String url) {
+    public String generateCSVLine(String url) throws InterruptedException {
+        if (url.equals("http://google.es")) {
+            Thread.sleep(10000);
+        }
+
+        String hash = urlService.generateHashFromURL(url);
+        if(urlService.urlExists(hash)) {
+            if (urlService.getUrl(hash).equals(url)){
+                return url + "," + SCHEME_HOST + hash + ",";
+            }
+        }
+        
         Future<String> urlStatus = urlService.isValid(url);
-        String response = "";
+        String response = url + ",";
+        logger.log(Level.WARNING, "response: " + response);
+        logger.log(Level.WARNING, "urlService: " + urlService);
+
+        String urlStatusResult = "";
         try {
-            String urlStatusResult = urlStatus.get(1500, MILLISECONDS);
+            urlStatusResult = urlStatus.get(1500, MILLISECONDS);
             logger.log(Level.WARNING, "urlStatus: " + urlStatusResult);
 
-            if (urlStatusResult.equals("URL is OK")) {
-                String id = Hashing.murmur3_32().hashString(url, StandardCharsets.UTF_8).toString();
-                urlService.insertURLIntoREDIS(id,url,urlStatus);
-                String newShortURL = SCHEME_HOST + id;
-                response = response + newShortURL + "," ;
-            }
-            else {
-                response = response + ",";
-                response = response + urlStatusResult;
-            }
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             response = response + ",";
             response = response + "URL not reachable";
+            return response;
+        }
+
+        if (urlStatusResult.equals("URL is OK")) {
+            urlService.insertURLIntoREDIS(hash,url,urlStatus);
+            String newShortURL = SCHEME_HOST + hash;
+            response = response + newShortURL + "," ;
+        }
+        else {
+            response = response + ",";
+            response = response + urlStatusResult;
         }
 
         logger.log(Level.WARNING, "response: " + response);

@@ -2,8 +2,11 @@ package urlshortener.endpoints;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Component;
+import urlshortener.MyApplicationContextAware;
 import urlshortener.services.CSVService;
+import urlshortener.services.URLService;
 
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
@@ -15,8 +18,19 @@ import java.util.logging.Logger;
 @Component
 public class CSVEndpoint {
 
+    /*
+    InputMessage:
+        - host -> http://yapsh.tk/ | http://localhost/
+        - url -> http://airezico.tk
+
+    OutputMessage -> // Quizás cambiar a string porque el frontend debería deserializar y pasa
+        - long_url -> http://airezico.tk
+        - short_url -> http://.../hash
+        - error ->
+     */
+
     @Autowired
-    CSVService csvService;
+    CSVService csvService = (CSVService) MyApplicationContextAware.getApplicationContext().getBean("CSVService");
 
     Logger logger = Logger.getLogger(CSVEndpoint.class.getName());
 
@@ -27,9 +41,17 @@ public class CSVEndpoint {
 
     @OnMessage
     public void onMessage(Session session, String message) {
-        logger.log(Level.WARNING, "OnMessage: " + session.getId());
-        logger.log(Level.WARNING, "csvService: " + csvService); // null
-        session.getAsyncRemote().sendText(csvService.generateCSVLine(message));
+        logger.log(Level.WARNING, "onMessage: " + message);
+        Thread thread = new Thread() {
+            public void run(){
+                try {
+                    session.getAsyncRemote().sendText(csvService.generateCSVLine(message));
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        thread.start();
     }
 
     @OnClose

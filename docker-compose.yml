@@ -1,12 +1,27 @@
 version : '3'
 services:
 
-  app:
-    build: spring-docker
+  nginx:
+    build: nginx-docker
     ports:
-      - ${SPRING_HOST_PORT}:${SPRING_CONTAINER_PORT}
+      - ${NGINX_HOST_PORT}:${NGINX_CONTAINER_PORT}
+    depends_on:
+      - app_1
+      - app_2
+
+  app_1:
+    build: spring-docker
     links:
       - db
+    ports:
+      - ${SPRING1_HOST_PORT}:${SPRING1_CONTAINER_PORT}
+
+  app_2:
+    build: spring-docker
+    links:
+      - db
+    ports:
+      - ${SPRING2_HOST_PORT}:${SPRING2_CONTAINER_PORT}
 
   db:
     image: redis:latest

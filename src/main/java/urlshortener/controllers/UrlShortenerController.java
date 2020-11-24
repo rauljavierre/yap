@@ -66,7 +66,7 @@ public class UrlShortenerController {
         // TODO: always returning 201????? And if it was created before?
         Future<String> urlStatus = urlService.isValid(url);
 
-        String hash = Hashing.murmur3_32().hashString(url, StandardCharsets.UTF_8).toString();
+        String hash = urlService.generateHashFromURL(url);
         String urlLocation = req.getScheme() + "://" + req.getServerName() + "/" + hash;
 
         JSONObject responseBody = new JSONObject();
