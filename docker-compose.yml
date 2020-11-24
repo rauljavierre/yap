@@ -13,7 +13,3 @@ services:
     ports:
       - ${REDIS_HOST_PORT}:${REDIS_CONTAINER_PORT}
 
-  sonarqube:
-    image: sonarqube:lts
-    ports:
-      - ${SONARQUBE_HOST_PORT}:${SONARQUBE_CONTAINER_PORT}
