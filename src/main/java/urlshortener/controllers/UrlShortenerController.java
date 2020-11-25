@@ -62,6 +62,7 @@ public class UrlShortenerController {
     public ResponseEntity<JSONObject> shortener(@RequestParam("url") String url,
                                             @RequestParam("generateQR") boolean generateQR,
                                             HttpServletRequest req) throws IOException, WriterException {
+        System.out.println("/link");
 
         // TODO: always returning 201????? And if it was created before?
         Future<String> urlStatus = urlService.isValid(url);
@@ -73,6 +74,8 @@ public class UrlShortenerController {
         responseBody.put("url", urlLocation);
         if(generateQR && !qrService.qrExists(hash)) {
             qrService.generateAndStoreQR(urlLocation, hash);
+        }
+        if(generateQR) {
             String qrLocation = req.getScheme() + "://" + req.getServerName() + "/qr/" + hash;
             responseBody.put("qr", qrLocation);
         }
