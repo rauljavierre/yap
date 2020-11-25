@@ -1,24 +1,23 @@
-version : '3'
+version : '3.2'
 services:
-
-  nginx:
-    build: nginx-docker
-    ports:
-      - ${NGINX_HOST_PORT}:${NGINX_CONTAINER_PORT}
-    depends_on:
-      - app_1
-      - app_2
-
-  app_1:
-    build: spring-docker
-    links:
-      - db
-
-  app_2:
-    build: spring-docker
-    links:
-      - db
 
   db:
     image: redis:latest
+
+  app:
+    image: yap_app
+    depends_on:
+      - db
+
+  nginx:
+    image: yap_nginx
+    ports:
+      - target: 80
+        published: 80
+        mode: host
+    depends_on:
+      - app
+
+
+
 

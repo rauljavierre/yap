@@ -13,6 +13,10 @@ fi
 
 cp ./build/libs/YapShortener.jar spring-docker
 
-printf "\n[up.sh] Tearing up containers\n"
-sudo docker-compose up --build
+printf "\n[up.sh] Creating images\n"
+sudo docker build -t yap_app --no-cache spring-docker
+sudo docker build -t yap_nginx --no-cache nginx-docker
 
+printf "\n[up.sh] Tearing up containers\n"
+sudo docker stack deploy yap -c docker-compose.yml --prune
+sudo docker service logs yap_app --follow
