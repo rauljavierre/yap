@@ -13,18 +13,12 @@ services:
     build: spring-docker
     links:
       - db
-    ports:
-      - ${SPRING1_HOST_PORT}:${SPRING1_CONTAINER_PORT}
 
   app_2:
     build: spring-docker
     links:
       - db
-    ports:
-      - ${SPRING2_HOST_PORT}:${SPRING2_CONTAINER_PORT}
 
   db:
     image: redis:latest
-    ports:
-      - ${REDIS_HOST_PORT}:${REDIS_CONTAINER_PORT}
 
