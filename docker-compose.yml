@@ -1,11 +1,20 @@
-version : '3.2'
-services:
+version: "3.7"
 
+networks:
+  backend:
+  host:
+
+volumes:
+  grafana-storage:
+
+services:
   db:
     image: redis:latest
 
   app:
     image: yap_app
+    networks:
+      - backend
     depends_on:
       - db
 
@@ -15,9 +24,38 @@ services:
       - target: 80
         published: 80
         mode: host
+    networks:
+      - backend
     depends_on:
       - app
 
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - target: 9090
+        published: 9090
+        mode: host
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+    networks:
+      - backend
+      - host
 
-
-
+  grafana:
+    image: grafana/grafana
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+    ports:
+      - target: 3000
+        published: 3000
+        mode: host
+    networks:
+      - backend

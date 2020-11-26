@@ -9,8 +9,8 @@ do
   		echo
   		for task in $tasks; do
         sudo docker inspect $task --format '{{.Spec.ContainerSpec.Image}}'
-        sudo docker inspect $task --format '{{.Status}}'
-        if sudo docker inspect $task --format '{{.Status}}' | grep 'insufficient resources' 1>/dev/null; then
+        sudo docker inspect $task --format '{{.Status.Message}}'
+        if sudo docker inspect $task --format '{{.Status.Message}}' | grep 'insufficient resources' 1>/dev/null; then
           echo "TODO: CREATE MORE REPLICAS"
         fi
   		done

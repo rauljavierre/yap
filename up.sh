@@ -19,4 +19,4 @@ sudo docker build -t yap_nginx --no-cache nginx-docker
 
 printf "\n[up.sh] Tearing up containers\n"
 sudo docker stack deploy yap -c docker-compose.yml --prune
-sudo docker service logs yap_app --follow
+sudo docker service logs yap_nginx --follow
