@@ -64,7 +64,6 @@ public class UrlShortenerController {
                                             HttpServletRequest req) throws IOException, WriterException {
         System.out.println("/link");
 
-        // TODO: always returning 201????? And if it was created before?
         Future<String> urlStatus = urlService.isValid(url);
 
         String hash = urlService.generateHashFromURL(url);
@@ -86,7 +85,6 @@ public class UrlShortenerController {
         CacheControl cacheControl = CacheControl.maxAge(60, TimeUnit.SECONDS).noTransform().mustRevalidate();
         responseHeaders.setCacheControl(cacheControl.toString());
 
-        // TODO: ask Pellicer 400 error -> scalability/functionality
         return new ResponseEntity<>(responseBody, responseHeaders, HttpStatus.CREATED);
     }
 }
