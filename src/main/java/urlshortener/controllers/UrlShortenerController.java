@@ -2,7 +2,6 @@ package urlshortener.controllers;
 
 import com.google.zxing.WriterException;
 import org.json.simple.JSONObject;
-import com.google.common.hash.Hashing;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.CacheControl;
@@ -18,14 +17,10 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import urlshortener.services.QRService;
 import urlshortener.services.URLService;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 @Controller
 @EnableSwagger2
@@ -64,10 +59,13 @@ public class UrlShortenerController {
                                             HttpServletRequest req) throws IOException, WriterException {
         System.out.println("/link");
 
-        Future<String> urlStatus = urlService.isValid(url);
-
         String hash = urlService.generateHashFromURL(url);
         String urlLocation = req.getScheme() + "://" + req.getServerName() + "/" + hash;
+
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.setLocation(URI.create(urlLocation));
+        CacheControl cacheControl = CacheControl.maxAge(60, TimeUnit.SECONDS).noTransform().mustRevalidate();
+        responseHeaders.setCacheControl(cacheControl.toString());
 
         JSONObject responseBody = new JSONObject();
         responseBody.put("url", urlLocation);
@@ -79,11 +77,14 @@ public class UrlShortenerController {
             responseBody.put("qr", qrLocation);
         }
 
-        HttpHeaders responseHeaders = new HttpHeaders();
-        responseHeaders.setLocation(URI.create(urlLocation));
+        if(urlService.urlExists(hash)) {
+            if (urlService.getUrl(hash).equals(url)){
+                return new ResponseEntity<>(responseBody, responseHeaders, HttpStatus.CREATED);
+            }
+        }
+
+        Future<String> urlStatus = urlService.isValid(url);
         urlService.insertURLIntoREDIS(hash, url, urlStatus);
-        CacheControl cacheControl = CacheControl.maxAge(60, TimeUnit.SECONDS).noTransform().mustRevalidate();
-        responseHeaders.setCacheControl(cacheControl.toString());
 
         return new ResponseEntity<>(responseBody, responseHeaders, HttpStatus.CREATED);
     }

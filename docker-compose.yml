@@ -29,6 +29,8 @@ services:
 
   grafana:
     image: grafana/grafana
+    volumes:
+      - ./grafana-data:/var/lib/grafana
     ports:
       - target: 3000
         published: 3000

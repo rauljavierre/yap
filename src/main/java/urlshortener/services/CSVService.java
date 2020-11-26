@@ -1,15 +1,7 @@
 package urlshortener.services;
 
-import com.google.common.hash.Hashing;
-import com.google.zxing.WriterException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import urlshortener.endpoints.CSVEndpoint;
-
-import java.io.IOException;
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
@@ -31,10 +23,7 @@ public class CSVService {
         this.urlService = urlService;
     }
 
-    public String generateCSVLine(String url) throws InterruptedException {
-        if (url.equals("http://google.es")) {
-            Thread.sleep(10000);
-        }
+    public String generateCSVLine(String url) {
 
         String hash = urlService.generateHashFromURL(url);
         if(urlService.urlExists(hash)) {
@@ -45,18 +34,14 @@ public class CSVService {
         
         Future<String> urlStatus = urlService.isValid(url);
         String response = url + ",";
-        logger.log(Level.WARNING, "response: " + response);
-        logger.log(Level.WARNING, "urlService: " + urlService);
 
         String urlStatusResult = "";
         try {
-            urlStatusResult = urlStatus.get(1500, MILLISECONDS);
-            logger.log(Level.WARNING, "urlStatus: " + urlStatusResult);
+            urlStatusResult = urlStatus.get(15000, MILLISECONDS);
 
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            response = response + ",";
-            response = response + "URL not reachable";
-            return response;
+        } catch (TimeoutException | InterruptedException | ExecutionException e) {
+            logger.log(Level.WARNING, e.getClass().getName());  // TimeoutException with stress tests...
+            return response + "," + "URL not reachable";
         }
 
         if (urlStatusResult.equals("URL is OK")) {
@@ -65,8 +50,7 @@ public class CSVService {
             response = response + newShortURL + "," ;
         }
         else {
-            response = response + ",";
-            response = response + urlStatusResult;
+            response = response + "," + urlStatusResult;
         }
 
         logger.log(Level.WARNING, "response: " + response);

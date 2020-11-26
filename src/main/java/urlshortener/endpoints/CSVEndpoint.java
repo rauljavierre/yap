@@ -1,16 +1,11 @@
 package urlshortener.endpoints;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Component;
 import urlshortener.MyApplicationContextAware;
 import urlshortener.services.CSVService;
-import urlshortener.services.URLService;
-
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
-import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -44,11 +39,7 @@ public class CSVEndpoint {
         logger.log(Level.WARNING, "onMessage: " + message);
         Thread thread = new Thread() {
             public void run(){
-                try {
-                    session.getAsyncRemote().sendText(csvService.generateCSVLine(message));
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                session.getAsyncRemote().sendText(csvService.generateCSVLine(message));
             }
         };
         thread.start();
