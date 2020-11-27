@@ -18,8 +18,4 @@ public class SpringConfiguration {
         return new ServerEndpointExporter();
     }
 
-    @Bean
-    public CSVService generateCSVService() {
-        return new CSVService();
-    }
 }

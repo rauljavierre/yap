@@ -3,15 +3,20 @@ package urlshortener.endpoints;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 import urlshortener.MyApplicationContextAware;
 import urlshortener.services.CSVService;
+import urlshortener.services.QRService;
+import urlshortener.services.URLService;
+
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @ServerEndpoint(value = "/csv")
-@Component
+@Controller
 public class CSVEndpoint {
 
     /*
@@ -25,10 +30,6 @@ public class CSVEndpoint {
         - error ->
      */
 
-    @Qualifier("CSVService")
-    @Autowired
-    CSVService csvService = (CSVService) MyApplicationContextAware.getApplicationContext().getBean("CSVService");
-
     Logger logger = Logger.getLogger(CSVEndpoint.class.getName());
 
     @OnOpen
@@ -41,6 +42,7 @@ public class CSVEndpoint {
         logger.log(Level.WARNING, "onMessage: " + message);
         Thread thread = new Thread() {
             public void run(){
+                CSVService csvService = (CSVService) MyApplicationContextAware.getApplicationContext().getBean("CSVService");
                 session.getAsyncRemote().sendText(csvService.generateCSVLine(message));
             }
         };
