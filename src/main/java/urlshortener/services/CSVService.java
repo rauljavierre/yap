@@ -17,11 +17,8 @@ public class CSVService {
     Logger logger = Logger.getLogger(CSVService.class.getName());
 
     @Autowired
-    private final URLService urlService;
+    private URLService urlService;
 
-    public CSVService(URLService urlService) {
-        this.urlService = urlService;
-    }
 
     public String generateCSVLine(String url) {
 

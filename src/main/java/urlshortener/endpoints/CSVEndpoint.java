@@ -1,6 +1,7 @@
 package urlshortener.endpoints;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import urlshortener.MyApplicationContextAware;
 import urlshortener.services.CSVService;
@@ -24,6 +25,7 @@ public class CSVEndpoint {
         - error ->
      */
 
+    @Qualifier("CSVService")
     @Autowired
     CSVService csvService = (CSVService) MyApplicationContextAware.getApplicationContext().getBean("CSVService");
 
