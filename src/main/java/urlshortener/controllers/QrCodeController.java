@@ -37,6 +37,8 @@ public class QrCodeController {
     public ResponseEntity<byte[]> qr(@PathVariable String hash,
                                      HttpServletRequest req) throws IOException, WriterException {
 
+        System.out.println("/qr/" + hash);
+
         if (!urlService.urlExists(hash)){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
