@@ -1,13 +1,14 @@
 
 scrape_configs:
 
-  - job_name: 'SPRING'
+  - job_name: 'FIRST_APP'
     scrape_interval: 1s
     metrics_path: '/actuator/prometheus'
     static_configs:
       - targets: ['yap_nginx:80']
 
-  - job_name: 'PROMETHEUS'
+  - job_name: 'SECOND_APP'
     scrape_interval: 1s
+    metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['localhost:9090']
+      - targets: ['yap_nginx:80']

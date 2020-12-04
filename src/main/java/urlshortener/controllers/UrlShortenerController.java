@@ -41,15 +41,26 @@ public class UrlShortenerController {
     }
 
     @GetMapping("{hash}")
-    public ResponseEntity<Void> redirectTo(@PathVariable String hash) {
+    public ResponseEntity<JSONObject> redirectTo(@PathVariable String hash) {
+
+        System.out.println("/hash");
+
+        JSONObject responseBody = new JSONObject();
         if (!urlService.urlExists(hash)){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            responseBody.put("error", "URL was not requested with /link");
+            return new ResponseEntity<>(responseBody, HttpStatus.NOT_FOUND);
+        }
+        if(!urlService.urlStatusIsOk(hash)){
+            responseBody.put("error", urlService.getUrl(hash));
+            return new ResponseEntity<>(responseBody, HttpStatus.NOT_FOUND);
         }
 
         String url = urlService.getUrl(hash);
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.setLocation(URI.create(url));
 
+        CacheControl cacheControl = CacheControl.maxAge(60, TimeUnit.SECONDS).noTransform().mustRevalidate();
+        responseHeaders.setCacheControl(cacheControl.toString());
         return new ResponseEntity<>(responseHeaders, HttpStatus.TEMPORARY_REDIRECT);
     }
 
@@ -64,8 +75,6 @@ public class UrlShortenerController {
 
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.setLocation(URI.create(urlLocation));
-        CacheControl cacheControl = CacheControl.maxAge(60, TimeUnit.SECONDS).noTransform().mustRevalidate();
-        responseHeaders.setCacheControl(cacheControl.toString());
 
         JSONObject responseBody = new JSONObject();
         responseBody.put("url", urlLocation);

@@ -59,16 +59,19 @@ public class URLService {
     @Async
     public void insertURLIntoREDIS(String hash, String url, Future<String> urlStatus) {
         try {
+            map.opsForValue().set(hash, "URL not validated yet");
             String status = urlStatus.get(10, TimeUnit.SECONDS);
             if (status.equals("URL is OK")) {
-                map.opsForValue().set(hash, url);
+                map.opsForValue().set(hash, url);       // http://
                 map.opsForValue().increment("URLs");
             }
             else {
+                map.opsForValue().set(hash, status);    // Error message
                 System.out.println("Not inserting " + url + " because " + status);
             }
         }
         catch (TimeoutException | InterruptedException | ExecutionException e) {
+            map.opsForValue().set(hash, "URL not reachable");    // Error message
             System.out.println("Not inserting " + url + " because it is not responding");
         }
     }
@@ -79,6 +82,10 @@ public class URLService {
 
     public boolean urlExists(String hash) {
         return map.opsForValue().get(hash) != null;
+    }
+
+    public boolean urlStatusIsOk(String hash) {
+        return map.opsForValue().get(hash).startsWith("http");
     }
 
     public String getUrl(String hash) {

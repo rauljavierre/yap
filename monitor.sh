@@ -12,6 +12,7 @@ do
         sudo docker inspect $task --format '{{.Status.Message}}'
         if sudo docker inspect $task --format '{{.Status.Message}}' | grep 'insufficient resources' 1>/dev/null; then
           echo "TODO: CREATE MORE REPLICAS"
+          # sudo docker service --scale yap_app=2
         fi
   		done
 	done
