@@ -1,19 +1,17 @@
 #!/bin/bash
 
+number_of_apps=1
+
 while true
 do
-	services=$(sudo docker service ls --format '{{.ID}}')
-	for service in $services; do
-  		tasks=$(sudo docker service ps $service --format '{{.ID}}')
-  		echo
-  		echo
-  		for task in $tasks; do
-        sudo docker inspect $task --format '{{.Spec.ContainerSpec.Image}}'
-        sudo docker inspect $task --format '{{.Status.Message}}'
-        if sudo docker inspect $task --format '{{.Status.Message}}' | grep 'insufficient resources' 1>/dev/null; then
-          echo "TODO: CREATE MORE REPLICAS"
-          # sudo docker service --scale yap_app=2
-        fi
-  		done
-	done
+  res=$(curl -s http://localhost/actuator/metrics/system.load.average.1m | grep value | cut -f2 -d:)
+  echo "load: " $res
+  echo "apps: "$number_of_apps
+  if [ "$(echo " 5 < $res " | bc -l )" == 1 ] && [ "$number_of_apps" -eq "1" ]; then
+    echo "SCALE UP"
+    number_of_apps=$((number_of_apps + 1))
+  elif [ "$(echo " 5 > $res " | bc -l )" == 1 ] && [ "$number_of_apps" -eq "2" ]; then
+    echo "SCALE DOWN"
+    number_of_apps=$((number_of_apps - 1))
+  fi
 done
