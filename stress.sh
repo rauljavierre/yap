@@ -2,5 +2,5 @@
 
 while true
 do
-	curl -X POST -F 'url=http://airezico.tk' -F 'generateQR=true' http://localhost/link
+	curl -X POST -F 'url=https://github.com/' -F 'generateQR=true' http://localhost/link
 done

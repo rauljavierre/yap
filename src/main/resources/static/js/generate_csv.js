@@ -1,13 +1,12 @@
 $(document).ready(
     function () {
         document.getElementById('inputFile').onchange = function () {
-            var fileName = this.value.substring(this.value.lastIndexOf("\\")+1,this.value.length);
-            document.getElementById("labelFile").innerHTML = fileName;
+            document.getElementById("labelFile").innerHTML = this.value.substring(this.value.lastIndexOf("\\") + 1, this.value.length);
         };
         $("#csv-file").submit(
             function (event) {
                 event.preventDefault();
-                var formData = new FormData(document.getElementById("csv-file"));
+                const formData = new FormData(document.getElementById("csv-file"));
                 $.ajax({
                     data: formData,
                     dataType: "text",
@@ -16,17 +15,17 @@ $(document).ready(
                     contentType: false,
                     processData: false
                 }).done(function(response) {
-                    var hrefContent = "data:text/plain;charset=utf-8," + encodeURIComponent(response);
-                    var filename = "shortener.csv";
+                    const hrefContent = "data:text/plain;charset=utf-8," + encodeURIComponent(response);
+                    const filename = "shortener.csv";
                     $("#csvResult").html(
                         "<div class='alert alert-danger lead'><a href='"
                         + hrefContent
                         + "' title='Download CSV file' download='"
                         + filename
                         + "'>Download CSV file</a></div>");
-                }).fail(function(jqxhr,textStatus,errorThrown) {
+                }).fail(function() {
                     $("#csvResult").html(
-                            "<div class='alert alert-danger lead' style=\"font-family: 'Open Sans'\">The file can't be empty &#128532;</div>");
+                            "<div class='alert alert-danger lead' style=\"font-family: 'Open Sans',serif\">The file can't be empty &#128532;</div>");
                 });
             }
         );

@@ -40,7 +40,7 @@ public class UrlShortenerController {
         this.qrService = qrService;
     }
 
-    @GetMapping("{hash}")
+    @GetMapping("/r/{hash}")
     public ResponseEntity<JSONObject> redirectTo(@PathVariable String hash) {
 
         System.out.println("/hash");

@@ -59,19 +59,19 @@ public class URLService {
     @Async
     public void insertURLIntoREDIS(String hash, String url, Future<String> urlStatus) {
         try {
-            map.opsForValue().set(hash, "URL not validated yet");
+            map.opsForValue().set("/r/" + hash, "URL not validated yet");
             String status = urlStatus.get(10, TimeUnit.SECONDS);
             if (status.equals("URL is OK")) {
-                map.opsForValue().set(hash, url);       // http://
+                map.opsForValue().set("/r/" + hash, url);       // http://
                 map.opsForValue().increment("URLs");
             }
             else {
-                map.opsForValue().set(hash, status);    // Error message
+                map.opsForValue().set("/r/" + hash, status);    // Error message
                 System.out.println("Not inserting " + url + " because " + status);
             }
         }
         catch (TimeoutException | InterruptedException | ExecutionException e) {
-            map.opsForValue().set(hash, "URL not reachable");    // Error message
+            map.opsForValue().set("/r/" + hash, "URL not reachable");    // Error message
             System.out.println("Not inserting " + url + " because it is not responding");
         }
     }

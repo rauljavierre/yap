@@ -1,6 +1,6 @@
 $(document).ready(
     function () {
-        var urlShort;
+        let urlShort;
         $("#shortener").submit(
             function (event) {
                 event.preventDefault();
@@ -10,7 +10,7 @@ $(document).ready(
                     data: $(this).serialize(),
                     success: function (msg) {
                         $("#result").html(
-                            "<div id=\"shortUrl\" class='alert alert-danger lead' style=\"font-family: 'Open Sans'\"><a target='_blank' href='"
+                            "<div id=\"shortUrl\" class='alert alert-danger lead' style=\"font-family: 'Open Sans',serif\"><a target='_blank' href='"
                             + "/r/"
                             + msg
                             + "'>"
@@ -31,7 +31,7 @@ $(document).ready(
                     },
                     error: function () {
                         $("#result").html(
-                            "<div class='alert alert-danger lead' style=\"font-family: 'Open Sans'\">Try with another URL... &#128532;</div>");
+                            "<div class='alert alert-danger lead' style=\"font-family: 'Open Sans',serif\">Try with another URL... &#128532;</div>");
                         $("#copy-to-clipboard").html("");
                         $("#qrImage").html("");
                         $("#qrCode").html("");
@@ -46,7 +46,7 @@ $(document).ready(
         $("#qrGenerate").click(
             function () {
                 $.ajax({
-                    type: "POST",
+                    type: "GET",
                     url: "/qr",
                     data: { url: urlShort },
                     success: function(response) {
@@ -54,7 +54,7 @@ $(document).ready(
                     },
                     error: function () {
                       $("#qrImage").html(
-                          "<div class='alert alert-danger lead' style=\"font-family: 'Open Sans'\">We've found an error generating the QR... &#128532;</div>");
+                          "<div class='alert alert-danger lead' style=\"font-family: 'Open Sans',serif\">We've found an error generating the QR... &#128532;</div>");
                       $("#text1").html("<p>" + urlShort + "</p>");
                     }
                 });
