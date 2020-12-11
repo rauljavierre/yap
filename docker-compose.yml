@@ -13,7 +13,7 @@ services:
     image: yap_nginx
     ports:
       - target: 80
-        published: 80
+        published: 3001
         mode: host
     depends_on:
       - app

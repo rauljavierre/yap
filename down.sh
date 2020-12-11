@@ -1,5 +1,7 @@
 #!/bin/bash
 
+sudo pkill python3
+
 sudo docker stack rm yap
 
 sudo docker stop $(sudo docker ps -a -q)

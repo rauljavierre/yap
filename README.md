@@ -23,6 +23,11 @@ sudo systemctl enable docker
 sudo apt-get install docker-compose
 ```
 
+### Install python3
+```
+sudo apt-get install python3
+```
+
 ### Install gradle
 ```
 sudo snap install gradle --classic

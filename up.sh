@@ -1,7 +1,12 @@
 #!/bin/bash
 
-printf "\n\n[up.sh] Tearing down old artifacts\n"
+printf "[up.sh] Tearing down old artifacts\n"
 sudo bash down.sh
+
+printf "\n\n[up.sh] Tearing up frontend server\n"
+cd frontend
+sudo python3 -m http.server 80 &
+cd -
 
 printf "\n[up.sh] Building gradle\n"
 gradle build --stacktrace # sudo snap install gradle --classic
