@@ -1,12 +1,13 @@
 $(document).ready(
     function () {
         let urlShort;
+
         $("#shortener").submit(
             function (event) {
                 event.preventDefault();
                 $.ajax({
                     type: "POST",
-                    url: "/link",
+                    url: "http://localhost:3001/link",
                     data: $(this).serialize(),
                     success: function (msg) {
                         $("#result").html(
@@ -30,6 +31,8 @@ $(document).ready(
                         urlShort = encodeURIComponent(urlShort);
                     },
                     error: function () {
+                        console.log("hey buenas")
+
                         $("#result").html(
                             "<div class='alert alert-danger lead' style=\"font-family: 'Open Sans',serif\">Try with another URL... &#128532;</div>");
                         $("#copy-to-clipboard").html("");
