@@ -40,13 +40,8 @@ public class CSVEndpoint {
     @OnMessage
     public void onMessage(Session session, String message) {
         logger.log(Level.WARNING, "onMessage: " + message);
-        Thread thread = new Thread() {
-            public void run(){
-                CSVService csvService = (CSVService) MyApplicationContextAware.getApplicationContext().getBean("CSVService");
-                session.getAsyncRemote().sendText(csvService.generateCSVLine(message));
-            }
-        };
-        thread.start();
+        CSVService csvService = (CSVService) MyApplicationContextAware.getApplicationContext().getBean("CSVService");
+        session.getAsyncRemote().sendText(csvService.generateCSVLine(message));
     }
 
     @OnClose
