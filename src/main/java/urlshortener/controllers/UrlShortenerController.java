@@ -24,9 +24,6 @@ import urlshortener.services.URLService;
 public class UrlShortenerController {
 
     @Autowired
-    private StringRedisTemplate map;
-
-    @Autowired
     private final URLService urlService;
 
     @Autowired

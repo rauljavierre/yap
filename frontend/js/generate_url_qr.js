@@ -4,6 +4,8 @@ $(document).ready(
         $("#shortener").submit(
             function (event) {
                 event.preventDefault();
+                $("#qrImage").html("");
+                $("#result").html("");
 
                 const generateQRisChecked = document.getElementById("generateQR").checked
                 const requestData = {
@@ -25,8 +27,6 @@ $(document).ready(
                             + msg.url
                             + "</a>" +
                             " </div>");
-                        $("#copy-to-clipboard").html(
-                            "<button type=\"button\" class=\"btn btn-danger\" onclick=\"copyToClipboard()\">Copy to clipboard &#128221;</button>");
 
                         if (generateQRisChecked) {
                             generateQR($('#shortUrl').text(), 15);  // polling: generateAndStoreQR may cost
@@ -38,7 +38,6 @@ $(document).ready(
                     error: function () {
                         $("#result").html(
                             "<div class='alert alert-danger lead' style=\"font-family: 'Open Sans',serif\">Try with another URL... &#128532;</div>");
-                        $("#copy-to-clipboard").html("");
                         $("#qrImage").html("");
                     }
                 });
@@ -46,22 +45,28 @@ $(document).ready(
         );
 
         function generateQR (urlShort, attempts) {
-            $.ajax({
-                type: "GET",
-                url: "http://localhost:3001/qr/" + urlShort.split("http://localhost/")[1],
-                success: function(response) {
-                    $('#qrImage').html('<img src="data:image/png;base64,'+response.qr +'" width="250em"/>');
-                },
-                error: function () {
-                    if (attempts === 0) {
-                        $("#qrImage").html(
-                            "<div class='alert alert-danger lead' style=\"font-family: 'Open Sans',serif\">We've found an error generating the QR... &#128532;</div>");
-                    }
-                    else {
-                        setTimeout(generateQR, 3000/attempts, urlShort, attempts - 1);
-                    }
+            if (attempts > 0) {
+                const url ="http://localhost:3001/qr/" + urlShort.split("http://localhost/")[1]
+                if (ImageExist(url)) {
+                    $("#qrImage").html("<img src=\"" + url + "\" width=\"200em\">");
                 }
-            });
+                else {
+                    setTimeout(generateQR, 2000/attempts, urlShort, attempts - 1);
+                }
+            }
+            else {
+                $("#result").html(
+                    "<div class='alert alert-danger lead' style=\"font-family: 'Open Sans',serif\">Try with another URL... &#128532;</div>");
+                $("#qrImage").html("");
+            }
+        }
+
+        // https://stackoverflow.com/questions/31936444/how-to-check-image-url-is-404-using-javascript
+        function ImageExist(url) {
+            const http = new XMLHttpRequest();
+            http.open('GET', url, false);
+            http.send();
+            return http.status!==404;
         }
     }
 );
