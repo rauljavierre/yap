@@ -32,7 +32,7 @@
                 <br>
                 <form action="" class="col-lg-12" id="shortener" role="form">
                     <div class="input-group input-group-lg col-sm-offset-4 col-sm-4"; style="margin: auto">
-                        <input class="center-block form-control input-lg" style="font-family: 'Open Sans',serif" name="url" placeholder="Enter a URL" title="Enter a URL" type="text">
+                        <input class="center-block form-control input-lg" style="font-family: 'Open Sans',serif" id="url" placeholder="Enter a URL" title="Enter a URL" type="text">
                         <span class="input-group-btn">
                             <button class="btn btn-lg btn-danger" style="font-family: 'Open Sans',serif" type="submit">Short me!</button>
                         </span>
@@ -46,17 +46,10 @@
         </div>
         <div class="row">
             <div class="col-lg-12 text-center">
-                <div class="col-sm-offset-4 col-sm-4 text-center">
+                <div class="col-sm-offset-4 col-sm-4 text-center" style="margin: auto">
                     <br/>
                     <div id="result"></div>
                     <div id="copy-to-clipboard"></div>
-                    <br/>
-                    <br/>
-                    <br/>
-                    <br/>
-                    <div id="qrCode" style="display: none" class="col-sm-offset-4 col-sm-4 text-center">
-                        <button class="btn btn-lg btn-danger" style="font-family: 'Open Sans',serif" type="button" id="qrGenerate">Generate QR!</button>
-                    </div>
                     <div id="qrImage"></div>
                 </div>
             </div>

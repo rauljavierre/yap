@@ -3,6 +3,7 @@ package urlshortener.controllers;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import urlshortener.services.QRService;
@@ -19,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 
 @Controller
 @EnableSwagger2
+@CrossOrigin
 public class QrCodeController {
 
     public QrCodeController(QRService qrService, URLService urlService) {
@@ -35,7 +37,6 @@ public class QrCodeController {
     @GetMapping("/qr/{hash}")
     public ResponseEntity<JSONObject> qr(@PathVariable String hash,
                                          HttpServletRequest req) throws IOException, WriterException {
-
         System.out.println("/qr/" + hash);
 
         JSONObject responseBody = new JSONObject();
@@ -49,21 +50,23 @@ public class QrCodeController {
         }
 
         URI url = URI.create(req.getScheme() + "://" + req.getServerName() + "/" + hash);
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.setLocation(url);
 
         byte[] qrBase64;
         if(qrService.qrExists(hash)) {
             qrBase64 = qrService.getQR(hash);
+
+            // Cache the response only if the QR is not null
+            CacheControl cacheControl = CacheControl.maxAge(60*60*24*365, TimeUnit.SECONDS).noTransform().mustRevalidate();
+            responseHeaders.setCacheControl(cacheControl.toString());
         }
         else {
+            // qrBase64 may be null: polling with intervals in frontend
             qrBase64 = qrService.generateAndStoreQR(url.toString(), hash);
         }
         responseBody.put("qr", qrBase64);
 
-        HttpHeaders responseHeaders = new HttpHeaders();
-        responseHeaders.setLocation(url);
-
-        CacheControl cacheControl = CacheControl.maxAge(60, TimeUnit.SECONDS).noTransform().mustRevalidate();
-        responseHeaders.setCacheControl(cacheControl.toString());
         return new ResponseEntity<>(responseBody, responseHeaders, HttpStatus.OK);
     }
 }

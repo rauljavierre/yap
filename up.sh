@@ -5,7 +5,7 @@ sudo bash down.sh
 
 printf "\n\n[up.sh] Tearing up frontend server\n"
 cd frontend
-sudo python3 -m http.server 80 &
+sudo python3 FrontendServer.py 80 http://localhost:3001/ &
 cd -
 
 printf "\n[up.sh] Building gradle\n"

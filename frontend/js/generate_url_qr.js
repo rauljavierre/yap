@@ -1,67 +1,67 @@
 $(document).ready(
     function () {
-        let urlShort;
 
         $("#shortener").submit(
             function (event) {
                 event.preventDefault();
+
+                const generateQRisChecked = document.getElementById("generateQR").checked
+                const requestData = {
+                    url: document.getElementById("url").value,
+                    generateQR: generateQRisChecked
+                }
+
                 $.ajax({
                     type: "POST",
                     url: "http://localhost:3001/link",
-                    data: $(this).serialize(),
+                    dataType : "json",
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify(requestData),
                     success: function (msg) {
                         $("#result").html(
                             "<div id=\"shortUrl\" class='alert alert-danger lead' style=\"font-family: 'Open Sans',serif\"><a target='_blank' href='"
-                            + "/r/"
-                            + msg
+                            + msg.url
                             + "'>"
-                            + window.location.href.replace('http://','')
-                            + "r/"
-                            + msg
+                            + msg.url
                             + "</a>" +
                             " </div>");
                         $("#copy-to-clipboard").html(
                             "<button type=\"button\" class=\"btn btn-danger\" onclick=\"copyToClipboard()\">Copy to clipboard &#128221;</button>");
 
-                        const qrButton = document.getElementById("qrCode");
-                        if (qrButton.style.display === "none") {
-                            qrButton.style.display = "block";
+                        if (generateQRisChecked) {
+                            generateQR($('#shortUrl').text(), 15);  // polling: generateAndStoreQR may cost
                         }
-                        urlShort = $('#shortUrl').text();
-                        urlShort = encodeURIComponent(urlShort);
+                        else {
+                            $("#qrImage").html("");
+                        }
                     },
                     error: function () {
-                        console.log("hey buenas")
-
                         $("#result").html(
                             "<div class='alert alert-danger lead' style=\"font-family: 'Open Sans',serif\">Try with another URL... &#128532;</div>");
                         $("#copy-to-clipboard").html("");
                         $("#qrImage").html("");
-                        $("#qrCode").html("");
-
-                        const qrButton = document.getElementById("qrCode");
-                        qrButton.style.display = "none";
                     }
                 });
             }
         );
 
-        $("#qrGenerate").click(
-            function () {
-                $.ajax({
-                    type: "GET",
-                    url: "/qr",
-                    data: { url: urlShort },
-                    success: function(response) {
-                        $('#qrImage').html('<img src="data:image/png;base64,'+response+'"/>');
-                    },
-                    error: function () {
-                      $("#qrImage").html(
-                          "<div class='alert alert-danger lead' style=\"font-family: 'Open Sans',serif\">We've found an error generating the QR... &#128532;</div>");
-                      $("#text1").html("<p>" + urlShort + "</p>");
+        function generateQR (urlShort, attempts) {
+            $.ajax({
+                type: "GET",
+                url: "http://localhost:3001/qr/" + urlShort.split("http://localhost/")[1],
+                success: function(response) {
+                    $('#qrImage').html('<img src="data:image/png;base64,'+response.qr +'" width="250em"/>');
+                },
+                error: function () {
+                    if (attempts === 0) {
+                        $("#qrImage").html(
+                            "<div class='alert alert-danger lead' style=\"font-family: 'Open Sans',serif\">We've found an error generating the QR... &#128532;</div>");
                     }
-                });
-            }
-        );
+                    else {
+                        setTimeout(generateQR, 3000/attempts, urlShort, attempts - 1);
+                    }
+                }
+            });
+        }
     }
 );

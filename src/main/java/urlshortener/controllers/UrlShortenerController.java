@@ -4,26 +4,23 @@ import com.google.zxing.WriterException;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.http.CacheControl;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.net.URI;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+
+import urlshortener.domain.LinkBody;
 import urlshortener.services.QRService;
 import urlshortener.services.URLService;
 
 @Controller
 @EnableSwagger2
+@CrossOrigin
 public class UrlShortenerController {
 
     @Autowired
@@ -40,9 +37,8 @@ public class UrlShortenerController {
         this.qrService = qrService;
     }
 
-    @GetMapping("/r/{hash}")
+    @GetMapping("{hash}")
     public ResponseEntity<JSONObject> redirectTo(@PathVariable String hash) {
-
         System.out.println("/hash");
 
         JSONObject responseBody = new JSONObject();
@@ -59,16 +55,21 @@ public class UrlShortenerController {
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.setLocation(URI.create(url));
 
-        CacheControl cacheControl = CacheControl.maxAge(60, TimeUnit.SECONDS).noTransform().mustRevalidate();
+        CacheControl cacheControl = CacheControl.maxAge(60*60*24*365, TimeUnit.SECONDS).noTransform().mustRevalidate();
         responseHeaders.setCacheControl(cacheControl.toString());
         return new ResponseEntity<>(responseHeaders, HttpStatus.TEMPORARY_REDIRECT);
     }
 
-    @PostMapping("/link")
-    public ResponseEntity<JSONObject> shortener(@RequestParam("url") String url,
-                                            @RequestParam("generateQR") boolean generateQR,
-                                            HttpServletRequest req) throws IOException, WriterException {
+    @RequestMapping(value = "/link", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<JSONObject> shortener(@RequestBody LinkBody linkBody, HttpServletRequest req) throws IOException, WriterException {
         System.out.println("/link");
+
+        String url = linkBody.getUrl();
+        boolean generateQR = linkBody.getGenerateQR();
+        JSONObject responseBody = new JSONObject();
+        if (url.equals("")) {
+            return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+        }
 
         String hash = urlService.generateHashFromURL(url);
         String urlLocation = req.getScheme() + "://" + req.getServerName() + "/" + hash;
@@ -76,9 +77,8 @@ public class UrlShortenerController {
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.setLocation(URI.create(urlLocation));
 
-        JSONObject responseBody = new JSONObject();
         responseBody.put("url", urlLocation);
-        if(generateQR && !qrService.qrExists(hash)) {
+        if(!qrService.qrExists(hash)) { // We
             qrService.generateAndStoreQR(urlLocation, hash);
         }
         if(generateQR) {
