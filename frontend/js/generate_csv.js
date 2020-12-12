@@ -15,7 +15,6 @@ $(document).ready(
                 // Event fired when file reading finished
                 reader.addEventListener('load', function(e) {
                     let fileData = e.target.result;
-                    fileData.replace(/(\r\n|\n|\r)/gm, ",");
                     let urlList = fileData.split(",");
                     let lastURL = urlList[urlList.length-1];
                     urlList[urlList.length-1] = lastURL.substring(0, lastURL.length-1);
