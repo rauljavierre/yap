@@ -34,17 +34,19 @@ public class QrCodeController {
     @Autowired
     private final URLService urlService;
 
-    @GetMapping("/qr/{hash}")
-    public ResponseEntity<JSONObject> qr(@PathVariable String hash,
+    @GetMapping(value = "/qr/{hash}")
+    public ResponseEntity<?> qr(@PathVariable String hash,
                                          HttpServletRequest req) throws IOException, WriterException {
         System.out.println("/qr/" + hash);
 
-        JSONObject responseBody = new JSONObject();
+
         if (!urlService.urlExists(hash)){
+            JSONObject responseBody = new JSONObject();
             responseBody.put("error", "URL was not requested with /link");
             return new ResponseEntity<>(responseBody, HttpStatus.NOT_FOUND);
         }
         if(!urlService.urlStatusIsOk(hash)){
+            JSONObject responseBody = new JSONObject();
             responseBody.put("error", urlService.getUrl(hash));
             return new ResponseEntity<>(responseBody, HttpStatus.NOT_FOUND);
         }
@@ -65,8 +67,8 @@ public class QrCodeController {
             // qrBase64 may be null: polling with intervals in frontend
             qrBase64 = qrService.generateAndStoreQR(url.toString(), hash);
         }
-        responseBody.put("qr", qrBase64);
 
-        return new ResponseEntity<>(responseBody, responseHeaders, HttpStatus.OK);
+        responseHeaders.setContentType(MediaType.IMAGE_PNG);
+        return new ResponseEntity<>(qrBase64, responseHeaders, HttpStatus.OK);
     }
 }
