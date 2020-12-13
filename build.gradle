@@ -34,9 +34,10 @@ dependencies {
     implementation 'com.google.guava:guava:23.0'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'io.springfox:springfox-swagger2:2.9.2'
-    implementation 'io.springfox:springfox-swagger-ui:2.9.2'
     implementation 'org.apache.httpcomponents:httpclient'
+
+    implementation 'org.springframework.boot:spring-boot-starter-hateoas'
+
 
     // Websockets
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
@@ -50,6 +51,8 @@ dependencies {
 
     // JSON library
     compile group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1'
+
+
 
     // Frontend
     runtime 'org.webjars:bootstrap:3.3.7'

@@ -2,24 +2,24 @@ package urlshortener.controllers;
 
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.Link;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import urlshortener.services.QRService;
 import org.springframework.stereotype.Controller;
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
-import java.net.URI;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import com.google.zxing.WriterException;
 import urlshortener.services.URLService;
 
-import javax.servlet.http.HttpServletRequest;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 @Controller
-@EnableSwagger2
+//@EnableSwagger2
 @CrossOrigin
 public class QrCodeController {
 
@@ -35,8 +35,7 @@ public class QrCodeController {
     private final URLService urlService;
 
     @GetMapping(value = "/qr/{hash}")
-    public ResponseEntity<?> qr(@PathVariable String hash,
-                                         HttpServletRequest req) throws IOException, WriterException {
+    public ResponseEntity<?> qr(@PathVariable String hash) throws IOException, WriterException {
         System.out.println("/qr/" + hash);
 
 
@@ -50,10 +49,9 @@ public class QrCodeController {
             responseBody.put("error", urlService.getUrl(hash));
             return new ResponseEntity<>(responseBody, HttpStatus.NOT_FOUND);
         }
-
-        URI url = URI.create(req.getScheme() + "://" + req.getServerName() + "/" + hash);
+        Link link = linkTo(UrlShortenerController.class).slash(hash).withSelfRel();
         HttpHeaders responseHeaders = new HttpHeaders();
-        responseHeaders.setLocation(url);
+        responseHeaders.setLocation(link.toUri());
 
         byte[] qrBase64;
         if(qrService.qrExists(hash)) {
@@ -65,7 +63,7 @@ public class QrCodeController {
         }
         else {
             // qrBase64 may be null: polling with intervals in frontend
-            qrBase64 = qrService.generateAndStoreQR(url.toString(), hash);
+            qrBase64 = qrService.generateAndStoreQR(link.getHref(), hash);
         }
 
         responseHeaders.setContentType(MediaType.IMAGE_PNG);

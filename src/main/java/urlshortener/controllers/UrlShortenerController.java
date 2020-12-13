@@ -3,23 +3,23 @@ package urlshortener.controllers;
 import com.google.zxing.WriterException;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.hateoas.Link;
 import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
-import javax.servlet.http.HttpServletRequest;
+import urlshortener.domain.LinkBody;
+import urlshortener.services.QRService;
+import urlshortener.services.URLService;
+
 import java.io.IOException;
 import java.net.URI;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import urlshortener.domain.LinkBody;
-import urlshortener.services.QRService;
-import urlshortener.services.URLService;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Controller
-@EnableSwagger2
 @CrossOrigin
 public class UrlShortenerController {
 
@@ -58,7 +58,7 @@ public class UrlShortenerController {
     }
 
     @RequestMapping(value = "/link", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<JSONObject> shortener(@RequestBody LinkBody linkBody, HttpServletRequest req) throws IOException, WriterException {
+    public ResponseEntity<JSONObject> shortener(@RequestBody LinkBody linkBody) throws IOException, WriterException {
         System.out.println("/link");
 
         String url = linkBody.getUrl();
@@ -69,7 +69,8 @@ public class UrlShortenerController {
         }
 
         String hash = urlService.generateHashFromURL(url);
-        String urlLocation = req.getScheme() + "://" + req.getServerName() + "/" + hash;
+        Link link = linkTo(UrlShortenerController.class).slash(hash).withSelfRel();
+        String urlLocation = link.getHref();
 
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.setLocation(URI.create(urlLocation));
@@ -79,7 +80,8 @@ public class UrlShortenerController {
             qrService.generateAndStoreQR(urlLocation, hash);
         }
         if(generateQR) {
-            String qrLocation = req.getScheme() + "://" + req.getServerName() + "/qr/" + hash;
+            Link linkQR = linkTo(methodOn(QrCodeController.class).qr(hash)).withSelfRel();
+            String qrLocation = linkQR.getHref();
             responseBody.put("qr", qrLocation);
         }
 
