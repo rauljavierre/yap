@@ -1,6 +1,6 @@
 #!/bin/bash
 
-sudo pkill python3
+#sudo pkill python3
 
 sudo docker stack rm yap
 
