@@ -83,8 +83,10 @@ public class UrlShortenerController {
             qrService.generateAndStoreQR(urlLocation, hash);
         }
         if(generateQR) {
-            Link linkQR = linkTo(methodOn(QrCodeController.class).qr(hash)).withSelfRel();
-            String qrLocation = linkQR.getHref();
+            //Link linkQR = linkTo(methodOn(QrCodeController.class).qr(hash)).withSelfRel();
+            //String qrLocation = linkQR.getHref();
+            String qrLocation = SCHEME_HOST + "qr/" + hash;
+
             responseBody.put("qr", qrLocation);
         }
 
