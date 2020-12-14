@@ -76,7 +76,7 @@ public class UrlShortenerController {
         responseHeaders.setLocation(URI.create(urlLocation));
 
         responseBody.put("url", urlLocation);
-        if(!qrService.qrExists(hash)) { // We
+        if(!qrService.qrExists(hash)) {
             qrService.generateAndStoreQR(urlLocation, hash);
         }
         if(generateQR) {
