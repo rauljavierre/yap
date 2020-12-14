@@ -3,10 +3,10 @@
 printf "[up.sh] Tearing down old artifacts\n"
 sudo bash down.sh
 
-#printf "\n\n[up.sh] Tearing up frontend server\n"
-#cd frontend
-#sudo python3 FrontendServer.py 80 http://yapsh.tk:3001/ &
-#cd -
+printf "\n\n[up.sh] Tearing up frontend server\n"
+cd frontend
+sudo python3 FrontendServer.py 80 http://yapsh.tk:3001/ &
+cd -
 
 printf "\n[up.sh] Building gradle\n"
 gradle build --stacktrace # sudo snap install gradle --classic
