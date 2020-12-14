@@ -70,6 +70,7 @@ public class UrlShortenerController {
 
         String hash = urlService.generateHashFromURL(url);
         Link link = linkTo(UrlShortenerController.class).slash(hash).withSelfRel();
+        System.out.println(link.getHref());
         String urlLocation = link.getHref();
 
         HttpHeaders responseHeaders = new HttpHeaders();
