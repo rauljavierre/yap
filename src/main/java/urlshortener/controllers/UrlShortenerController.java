@@ -23,6 +23,8 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @CrossOrigin
 public class UrlShortenerController {
 
+    private String SCHEME_HOST = "http://yapsh.tk/";
+
     @Autowired
     private final URLService urlService;
 
@@ -69,9 +71,9 @@ public class UrlShortenerController {
         }
 
         String hash = urlService.generateHashFromURL(url);
-        Link link = linkTo(UrlShortenerController.class).slash(hash).withSelfRel();
-        System.out.println(link.getHref());
-        String urlLocation = link.getHref();
+        //Link link = linkTo(UrlShortenerController.class).slash(hash).withSelfRel();
+        //String urlLocation = link.getHref();
+        String urlLocation = SCHEME_HOST + hash;
 
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.setLocation(URI.create(urlLocation));

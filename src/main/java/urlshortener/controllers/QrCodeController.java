@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import urlshortener.services.QRService;
 import org.springframework.stereotype.Controller;
 import java.io.IOException;
+import java.net.URI;
 import java.util.concurrent.TimeUnit;
 
 import com.google.zxing.WriterException;
@@ -22,6 +23,8 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 //@EnableSwagger2
 @CrossOrigin
 public class QrCodeController {
+
+    private String SCHEME_HOST = "http://yapsh.tk/";
 
     public QrCodeController(QRService qrService, URLService urlService) {
         this.qrService = qrService;
@@ -49,9 +52,10 @@ public class QrCodeController {
             responseBody.put("error", urlService.getUrl(hash));
             return new ResponseEntity<>(responseBody, HttpStatus.NOT_FOUND);
         }
-        Link link = linkTo(UrlShortenerController.class).slash(hash).withSelfRel();
+        //Link link = linkTo(UrlShortenerController.class).slash(hash).withSelfRel();
+        String urlLocation = SCHEME_HOST + hash;
         HttpHeaders responseHeaders = new HttpHeaders();
-        responseHeaders.setLocation(link.toUri());
+        responseHeaders.setLocation(URI.create(urlLocation));
 
         byte[] qrBase64;
         if(qrService.qrExists(hash)) {
@@ -63,7 +67,7 @@ public class QrCodeController {
         }
         else {
             // qrBase64 may be null: polling with intervals in frontend
-            qrBase64 = qrService.generateAndStoreQR(link.getHref(), hash);
+            qrBase64 = qrService.generateAndStoreQR(urlLocation, hash);
         }
 
         responseHeaders.setContentType(MediaType.IMAGE_PNG);
