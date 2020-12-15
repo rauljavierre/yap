@@ -12,7 +12,10 @@ import urlshortener.services.URLService;
 
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
-import java.util.Random;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -20,48 +23,43 @@ import java.util.logging.Logger;
 @Controller
 public class CSVEndpoint {
 
-    /*
-    InputMessage:
-        - host -> http://yapsh.tk/ | http://localhost/
-        - url -> http://airezico.tk
-
-    OutputMessage -> // Quizás cambiar a string porque el frontend debería deserializar y pasa
-        - long_url -> http://airezico.tk
-        - short_url -> http://.../hash
-        - error ->
-     */
+    // https://www.byteslounge.com/tutorials/java-ee-html5-websockets-with-multiple-clients-example
+    private static Set<Session> clients =
+            Collections.synchronizedSet(new HashSet<Session>());
 
     Logger logger = Logger.getLogger(CSVEndpoint.class.getName());
 
     @OnOpen
     public void onOpen(Session session) {
         logger.log(Level.WARNING, "OnOpen: " + session.getId());
+        clients.add(session);
     }
 
     @OnMessage
-    public void onMessage(Session session, String message) throws InterruptedException {
+    public void onMessage(Session session, String message) throws IOException {
         logger.log(Level.WARNING, "onMessage: " + message);
         CSVService csvService = (CSVService) MyApplicationContextAware.getApplicationContext().getBean("CSVService");
-        RemoteEndpoint.Async remote = session.getAsyncRemote();
-        try {
-            remote.sendText(csvService.generateCSVLine(message));
-        } catch (IllegalStateException e) {
-            // If trying to write in socket in use
-            // Repeat one more time (with random sleep between 1 and 2 seconds)
-            int random = (int)(2 * Math.random() + 1);
-            Thread.sleep(random * 1000);
-            remote.sendText(csvService.generateCSVLine(message));
+        String response = csvService.generateCSVLine(message);
+        synchronized (clients) {
+            for(Session client : clients){
+                if (client.equals(session)){
+                    client.getBasicRemote().sendText(response);
+                    logger.log(Level.WARNING, "onResponse: " + response);
+                }
+            }
         }
     }
 
     @OnClose
     public void onClose(Session session) {
         logger.log(Level.WARNING, "OnClose: " + session.getId());
+        clients.remove(session);
     }
 
     @OnError
     public void onError(Session session, Throwable throwable) {
         logger.log(Level.WARNING, "OnError: " + throwable.getMessage());
+        clients.remove(session);
     }
 }
 
