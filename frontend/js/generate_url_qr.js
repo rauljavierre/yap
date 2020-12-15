@@ -21,7 +21,7 @@ $(document).ready(
                     data: JSON.stringify(requestData),
                     success: function (msg) {
                         $("#result").html(
-                            "<div id=\"shortUrl\" class='alert alert-danger lead' style=\"font-family: 'Open Sans',serif\"><a target='_blank' href='"
+                            "<div id=\"shortUrl\" class='alert alert-danger lead' style='display: table; width: 30%; margin: 0 auto;'><a target='_blank' href='"
                             + msg.url
                             + "'>"
                             + msg.url
@@ -37,7 +37,7 @@ $(document).ready(
                     },
                     error: function () {
                         $("#result").html(
-                            "<div class='alert alert-danger lead' style=\"font-family: 'Open Sans',serif\">Try with another URL... &#128532;</div>");
+                            "<div class='alert alert-danger lead' style='display: table; width: 30%; margin: 0 auto;'>Try with another URL... &#128532;</div>");
                         $("#qrImage").html("");
                     }
                 });

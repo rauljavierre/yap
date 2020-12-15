@@ -2,6 +2,7 @@ package urlshortener.endpoints;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -26,6 +27,16 @@ public class CSVEndpoint {
     // https://www.byteslounge.com/tutorials/java-ee-html5-websockets-with-multiple-clients-example
     private static Set<Session> clients =
             Collections.synchronizedSet(new HashSet<Session>());
+
+    /*
+    <"124891724", "http://airezico.tk">
+    <"qr124891724", base64>
+    <URLs, "3">
+    <QRs, "7">
+    <CSVs, "1">
+     */
+    @Autowired
+    private StringRedisTemplate map;
 
     Logger logger = Logger.getLogger(CSVEndpoint.class.getName());
 
@@ -52,6 +63,7 @@ public class CSVEndpoint {
 
     @OnClose
     public void onClose(Session session) {
+        map.opsForValue().increment("CSVs");
         logger.log(Level.WARNING, "OnClose: " + session.getId());
         clients.remove(session);
     }
@@ -62,4 +74,3 @@ public class CSVEndpoint {
         clients.remove(session);
     }
 }
-

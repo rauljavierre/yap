@@ -27,6 +27,8 @@ public class URLService {
     <"124891724", "http://airezico.tk">
     <"qr124891724", base64>
     <URLs, "3">
+    <QRs, "7">
+    <CSVs, "1">
      */
     @Autowired
     private StringRedisTemplate map;
