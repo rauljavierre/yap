@@ -2,15 +2,6 @@ version: "3.7"
 
 services:
 
-  python:
-    image: yap_python
-    volumes:
-      - ./frontend:/app
-    ports:
-      - target: 80
-        published: 80
-        mode: host
-
   db:
     image: redis:latest
 
@@ -19,11 +10,16 @@ services:
     depends_on:
       - db
 
+  python:
+    image: yap_python
+    volumes:
+      - ./frontend:/app
+
   nginx:
     image: yap_nginx
     ports:
       - target: 80
-        published: 3001
+        published: 80
         mode: host
     depends_on:
       - app
