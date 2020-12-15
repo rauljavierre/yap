@@ -9,6 +9,7 @@ $(document).ready(
         $("#csv-file").submit(
             function (event) {
                 event.preventDefault();
+                $("#csvResult").html("");
                 let formData = new FormData(document.getElementById("csv-file"));
                 let file = formData.get('file');
                 let reader = new FileReader();
