@@ -12,6 +12,7 @@ import urlshortener.services.URLService;
 
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -38,11 +39,17 @@ public class CSVEndpoint {
     }
 
     @OnMessage
-    public void onMessage(Session session, String message) {
+    public void onMessage(Session session, String message) throws InterruptedException {
         logger.log(Level.WARNING, "onMessage: " + message);
         CSVService csvService = (CSVService) MyApplicationContextAware.getApplicationContext().getBean("CSVService");
         RemoteEndpoint.Async remote = session.getAsyncRemote();
-        synchronized (remote) {
+        try {
+            remote.sendText(csvService.generateCSVLine(message));
+        } catch (IllegalStateException e) {
+            // If trying to write in socket in use
+            // Repeat one more time (with random sleep between 1 and 2 seconds)
+            int random = (int)(2 * Math.random() + 1);
+            Thread.sleep(random * 1000);
             remote.sendText(csvService.generateCSVLine(message));
         }
     }
