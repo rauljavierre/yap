@@ -41,8 +41,9 @@ public class CSVEndpoint {
     public void onMessage(Session session, String message) {
         logger.log(Level.WARNING, "onMessage: " + message);
         CSVService csvService = (CSVService) MyApplicationContextAware.getApplicationContext().getBean("CSVService");
-        synchronized (session) {
-            session.getAsyncRemote().sendText(csvService.generateCSVLine(message));
+        RemoteEndpoint.Async remote = session.getAsyncRemote();
+        synchronized (remote) {
+            remote.sendText(csvService.generateCSVLine(message));
         }
     }
 
