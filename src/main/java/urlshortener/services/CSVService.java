@@ -16,6 +16,17 @@ public class CSVService {
 
 
     private String SCHEME_HOST = "http://yapsh.tk/";
+
+    /*
+    <"124891724", "http://airezico.tk">
+    <"qr124891724", base64>
+    <URLs, "3">
+    <QRs, "7">
+    <CSVs, "1">
+     */
+    @Autowired
+    private StringRedisTemplate map;
+
     Logger logger = Logger.getLogger(CSVService.class.getName());
 
     @Autowired
@@ -54,6 +65,10 @@ public class CSVService {
 
         logger.log(Level.WARNING, "response: " + response);
         return response;
+    }
+
+    public void incrementNumberOfCSVs() {
+        map.opsForValue().increment("CSVs");
     }
 
 }

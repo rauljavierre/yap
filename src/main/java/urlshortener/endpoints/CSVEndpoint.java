@@ -25,18 +25,7 @@ import java.util.logging.Logger;
 public class CSVEndpoint {
 
     // https://www.byteslounge.com/tutorials/java-ee-html5-websockets-with-multiple-clients-example
-    private static Set<Session> clients =
-            Collections.synchronizedSet(new HashSet<Session>());
-
-    /*
-    <"124891724", "http://airezico.tk">
-    <"qr124891724", base64>
-    <URLs, "3">
-    <QRs, "7">
-    <CSVs, "1">
-     */
-    @Autowired
-    private StringRedisTemplate map;
+    private static Set<Session> clients = Collections.synchronizedSet(new HashSet<>());
 
     Logger logger = Logger.getLogger(CSVEndpoint.class.getName());
 
@@ -63,7 +52,8 @@ public class CSVEndpoint {
 
     @OnClose
     public void onClose(Session session) {
-        map.opsForValue().increment("CSVs");
+        CSVService csvService = (CSVService) MyApplicationContextAware.getApplicationContext().getBean("CSVService");
+        csvService.incrementNumberOfCSVs();
         logger.log(Level.WARNING, "OnClose: " + session.getId());
         clients.remove(session);
     }
