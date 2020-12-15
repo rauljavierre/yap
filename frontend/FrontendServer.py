@@ -2,7 +2,6 @@
 
 import sys
 from http.server import HTTPServer, BaseHTTPRequestHandler
-import base64
 
 if len(sys.argv)-1 != 2:
     print("""Usage: {} <port_number> <url>""".format(sys.argv[0]))
@@ -10,6 +9,7 @@ if len(sys.argv)-1 != 2:
 
 class Redirect(BaseHTTPRequestHandler):
     def do_GET(self):
+
         isAFrontendRoute = True if "/" == self.path or self.path.endswith(".html") or self.path.endswith(".js") or self.path.endswith(".png") else False
 
         if isAFrontendRoute:

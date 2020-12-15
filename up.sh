@@ -3,11 +3,6 @@
 printf "[up.sh] Tearing down old artifacts\n"
 sudo bash down.sh
 
-printf "\n\n[up.sh] Tearing up frontend server\n"
-cd frontend
-sudo python3 FrontendServer.py 80 http://yapsh.tk:3001/ &
-cd -
-
 printf "\n[up.sh] Building gradle\n"
 gradle build --stacktrace # sudo snap install gradle --classic
 
@@ -19,6 +14,7 @@ printf "\n[up.sh] Copying the jar generated with gradle build\n"
 cp ./build/libs/YapShortener.jar spring-docker
 
 printf "\n[up.sh] Creating images\n"
+sudo docker build -t yap_python --no-cache python-docker
 sudo docker build -t yap_app --no-cache spring-docker
 sudo docker build -t yap_nginx --no-cache nginx-docker
 

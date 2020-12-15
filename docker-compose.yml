@@ -1,6 +1,16 @@
 version: "3.7"
 
 services:
+
+  python:
+    image: yap_python
+    volumes:
+      - ./frontend:/app
+    ports:
+      - target: 80
+        published: 80
+        mode: host
+
   db:
     image: redis:latest
 
@@ -35,6 +45,3 @@ services:
       - target: 3000
         published: 3000
         mode: host
-
-
-# TODO: SONARQUBE
