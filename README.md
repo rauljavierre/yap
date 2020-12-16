@@ -28,11 +28,6 @@ sudo apt-get install docker-compose
 sudo docker swarm init
 ```
 
-### Install python3
-```
-sudo apt-get install python3
-```
-
 ### Install gradle
 ```
 sudo snap install gradle --classic
