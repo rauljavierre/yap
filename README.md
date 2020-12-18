@@ -1,6 +1,7 @@
 # YAP PLATFORM (URL SHORTENER) - Development
 
-
+## SLIDES
+http://yapsh.tk/0f39c2ba
 
 ## HOW TO BUILD AND LAUNCH THE ENTIRE APPLICATION
 
