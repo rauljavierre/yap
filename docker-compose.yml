@@ -18,11 +18,13 @@ services:
     image: yap_csvsmaster
     depends_on:
       - db
+      - rabbitmq
 
   csvsworker:
     image: yap_csvsworker
     depends_on:
       - db
+      - rabbitmq
 
   python:
     image: yap_python
@@ -39,14 +41,8 @@ services:
       - app
 
   rabbitmq:
-    image: rabbitmq:management
-    ports:
-      - mode: host
-        target: 15672
-        published: 15672
-      - mode: host
-        target: 5672
-        published: 5672
+    image: rabbitmq:3-management
+    hostname: "rabbitmq"
 
   prometheus:
     image: prom/prometheus

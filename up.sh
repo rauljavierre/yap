@@ -23,7 +23,7 @@ fi
 printf "\n[up.sh] Copying the jar generated with gradle build\n"
 cp ./ServiceURLsQRs/build/libs/ServiceURLsQRs.jar ./ServiceURLsQRs/spring-docker
 cp ./ServiceCSVs/build/libs/ServiceCSVs.jar ./ServiceCSVs/spring-docker
-cp ./ServiceCSVs/build/libs/ServiceCSVs.jar ./ServiceWorker/spring-docker
+cp ./ServiceWorker/build/libs/ServiceWorker.jar ./ServiceWorker/spring-docker
 
 
 printf "\n[up.sh] Creating images\n"
@@ -37,4 +37,4 @@ sudo chown -R 472:472 grafana-data  # Fix Grafana permission trouble with volume
 
 printf "\n[up.sh] Tearing up containers\n"
 sudo docker stack deploy yap -c docker-compose.yml --prune
-sudo docker service logs yap_nginx --follow
+sudo docker service logs yap_csvsmaster --follow

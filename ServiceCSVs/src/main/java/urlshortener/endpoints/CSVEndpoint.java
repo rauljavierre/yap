@@ -1,5 +1,7 @@
 package urlshortener.endpoints;
 
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessageProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import urlshortener.MyApplicationContextAware;
@@ -36,10 +38,9 @@ public class CSVEndpoint {
     public void onMessage(Session session, String message) throws IOException {
         logger.log(Level.WARNING, "onMessage: " + message);
 
-        // Meto en la cola
-        rabbitTemplate.convertAndSend("", "yap.request", "Hola Buenas;" + session.getId());
-        // Me quedo bloqueado esperando
-        String response = rabbitTemplate.receiveAndConvert(session.getId()).toString();
+        // Meto en la cola y me quedo bloqueado esperando
+        Message m = new Message(new String("Hola buenas;" + session.getId()).getBytes(), null);
+        String response = rabbitTemplate.sendAndReceive("", "yap.request", m).toString();
 
         synchronized (clients) {
             for(Session client : clients){
