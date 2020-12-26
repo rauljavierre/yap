@@ -4,9 +4,23 @@ services:
 
   db:
     image: redis:latest
+    ports:
+      - mode: host
+        target: 6379
+        published: 6379
 
-  app:
-    image: yap_app
+  urlsqrs:
+    image: yap_urlsqrs
+    depends_on:
+      - db
+
+  csvsmaster:
+    image: yap_csvsmaster
+    depends_on:
+      - db
+
+  csvsworker:
+    image: yap_csvsworker
     depends_on:
       - db
 
@@ -23,6 +37,16 @@ services:
         mode: host
     depends_on:
       - app
+
+  rabbitmq:
+    image: rabbitmq:management
+    ports:
+      - mode: host
+        target: 15672
+        published: 15672
+      - mode: host
+        target: 5672
+        published: 5672
 
   prometheus:
     image: prom/prometheus

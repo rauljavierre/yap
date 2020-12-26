@@ -62,19 +62,3 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
-
-sonarqube {
-    properties {
-        property 'sonar.host.url', 'http://localhost:9000'
-        property 'sonar.login', 'admin'
-        property 'sonar.password', 'admin'
-    }
-}
-
-jacocoTestReport {
-    reports {
-        xml.enabled true
-    }
-}
-test.finalizedBy jacocoTestReport
-tasks['sonarqube'].dependsOn test

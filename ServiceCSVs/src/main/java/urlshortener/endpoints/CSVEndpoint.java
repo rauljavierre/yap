@@ -1,16 +1,9 @@
 package urlshortener.endpoints;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.context.support.WebApplicationContextUtils;
 import urlshortener.MyApplicationContextAware;
 import urlshortener.services.CSVService;
-import urlshortener.services.QRService;
-import urlshortener.services.URLService;
-
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
@@ -19,6 +12,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 @ServerEndpoint(value = "/csv")
 @Controller
@@ -29,6 +23,9 @@ public class CSVEndpoint {
 
     Logger logger = Logger.getLogger(CSVEndpoint.class.getName());
 
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+
     @OnOpen
     public void onOpen(Session session) {
         logger.log(Level.WARNING, "OnOpen: " + session.getId());
@@ -38,8 +35,12 @@ public class CSVEndpoint {
     @OnMessage
     public void onMessage(Session session, String message) throws IOException {
         logger.log(Level.WARNING, "onMessage: " + message);
-        CSVService csvService = (CSVService) MyApplicationContextAware.getApplicationContext().getBean("CSVService");
-        String response = csvService.generateCSVLine(message);
+
+        // Meto en la cola
+        rabbitTemplate.convertAndSend("", "yap.request", "Hola Buenas;" + session.getId());
+        // Me quedo bloqueado esperando
+        String response = rabbitTemplate.receiveAndConvert(session.getId()).toString();
+
         synchronized (clients) {
             for(Session client : clients){
                 if (client.equals(session)){
