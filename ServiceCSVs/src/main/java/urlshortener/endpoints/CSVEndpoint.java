@@ -4,13 +4,11 @@ import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.core.Queue;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import urlshortener.MyApplicationContextAware;
 import urlshortener.services.CSVService;
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashSet;
@@ -32,22 +30,20 @@ public class CSVEndpoint {
     @OnOpen
     public void onOpen(Session session) {
         logger.log(Level.WARNING, "OnOpen: " + session.getId());
+        AmqpAdmin amqpAdmin = (AmqpAdmin) MyApplicationContextAware.getApplicationContext().getBean("amqpAdmin");
+        amqpAdmin.declareQueue(new Queue(session.getId()));
         clients.add(session);
     }
 
     @OnMessage
-    public void onMessage(Session session, String message) throws IOException {
+    public void onMessage(Session session, String message) {
         logger.log(Level.WARNING, "onMessage: " + message);
 
-        Message m = new Message(message.getBytes(), new MessageProperties());
         RabbitTemplate rabbitTemplate = (RabbitTemplate) MyApplicationContextAware.getApplicationContext().getBean("rabbitTemplate");
-        AmqpAdmin amqpAdmin = (AmqpAdmin) MyApplicationContextAware.getApplicationContext().getBean("amqpAdmin");
 
         try {
-            rabbitTemplate.send("", "yap.request", new Message((m + ";" + session.getId()).getBytes(), new MessageProperties()));
-            amqpAdmin.declareQueue(new Queue(session.getId()));
+            rabbitTemplate.send("", "yap.request", new Message((message + ";"  + session.getId()).getBytes(), new MessageProperties()));
             String response = new String(rabbitTemplate.receive(session.getId(), 15000).getBody(), StandardCharsets.UTF_8);
-
             logger.log(Level.WARNING, "Response: " + response);
 
             synchronized (clients) {
@@ -63,7 +59,6 @@ public class CSVEndpoint {
             logger.log(Level.WARNING, "Exception:" + e.toString());
             onClose(session);
         }
-
     }
 
     @OnClose

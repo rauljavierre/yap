@@ -3,7 +3,7 @@ $(document).ready(get_info);
 function get_info() {
     $.ajax({
         type: "GET",
-        url: "http://yapsh.tk/actuator/info",
+        url: "http://localhost/actuator/info",
         success: function (json) {
             $('#host_information_urls_qrs_csvs').html(
                 '<td>' + json.URLs +

@@ -15,7 +15,7 @@ $(document).ready(
 
                 $.ajax({
                     type: "POST",
-                    url: "http://yapsh.tk/link",
+                    url: "http://localhost/link",
                     dataType : "json",
                     contentType: "application/json; charset=utf-8",
                     data: JSON.stringify(requestData),
@@ -46,7 +46,7 @@ $(document).ready(
 
         function generateQR (urlShort, attempts) {
             if (attempts > 0) {
-                const url ="http://yapsh.tk/qr/" + urlShort.split("http://yapsh.tk/")[1]
+                const url ="http://localhost/qr/" + urlShort.split("http://localhost/")[1]
                 if (ImageExist(url)) {
                     $("#qrImage").html("<img src=\"" + url + "\" width=\"200em\">");
                 }
