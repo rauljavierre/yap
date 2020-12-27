@@ -43,6 +43,10 @@ services:
   rabbitmq:
     image: rabbitmq:3-management
     hostname: "rabbitmq"
+    ports:
+      - target: 15672
+        published: 15672
+        mode: host
 
   prometheus:
     image: prom/prometheus

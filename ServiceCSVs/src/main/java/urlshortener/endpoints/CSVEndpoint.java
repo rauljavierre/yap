@@ -25,8 +25,6 @@ public class CSVEndpoint {
 
     Logger logger = Logger.getLogger(CSVEndpoint.class.getName());
 
-    @Autowired
-    private RabbitTemplate rabbitTemplate;
 
     @OnOpen
     public void onOpen(Session session) {
@@ -38,15 +36,22 @@ public class CSVEndpoint {
     public void onMessage(Session session, String message) throws IOException {
         logger.log(Level.WARNING, "onMessage: " + message);
 
-        // Meto en la cola y me quedo bloqueado esperando
-        Message m = new Message(new String("Hola buenas;" + session.getId()).getBytes(), null);
-        String response = rabbitTemplate.sendAndReceive("", "yap.request", m).toString();
+        Message m = new Message(message.getBytes(), new MessageProperties());
+        RabbitTemplate rabbitTemplate = (RabbitTemplate) MyApplicationContextAware.getApplicationContext().getBean("rabbitTemplate");
+        String response = "pre";
+        try {
+            response = rabbitTemplate.sendAndReceive("", "yap.request", m).toString();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            logger.log(Level.WARNING, "Exception:" + e.toString());
+        }
+        logger.log(Level.WARNING, "Response: " + response);
 
         synchronized (clients) {
             for(Session client : clients){
                 if (client.equals(session)){
                     client.getBasicRemote().sendText(response);
-                    logger.log(Level.WARNING, "onResponse: " + response);
                 }
             }
         }

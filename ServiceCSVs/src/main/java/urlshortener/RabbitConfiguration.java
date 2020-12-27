@@ -1,41 +1,47 @@
 package urlshortener;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.DirectExchange;
 import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.rabbit.annotation.EnableRabbit;
+import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@EnableRabbit
 public class RabbitConfiguration {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
+    public static final String QUEUE_NAME = "yap.request";
+
+    private static final String EXCHANGE_NAME = "";
 
     @Bean
     public ConnectionFactory connectionFactory() {
-        return new CachingConnectionFactory("rabbitmq");
+        final CachingConnectionFactory connectionFactory = new CachingConnectionFactory("rabbitmq");
+        return connectionFactory;
     }
 
     @Bean
-    public RabbitTemplate rabbitTemplate() throws Exception {
+    public RabbitTemplate rabbitTemplate() {
+        RabbitTemplate rabbitTemplate = new RabbitTemplate();
+        rabbitTemplate.setReplyTimeout(15000);
         return new RabbitTemplate(connectionFactory());
     }
 
     @Bean
-    SimpleMessageListenerContainer container(ConnectionFactory connectionFactory) {
-        SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
-        container.setConnectionFactory(connectionFactory);
-        return container;
+    public Queue queue() {
+        return new Queue(QUEUE_NAME);
     }
 
+    @Bean
+    public TopicExchange exchange() {
+        return new TopicExchange(EXCHANGE_NAME);
+    }
+
+    @Bean
+    public Binding binding(Queue queue, TopicExchange exchange) {
+        return BindingBuilder.bind(queue).to(exchange).with(QUEUE_NAME);
+    }
 }
