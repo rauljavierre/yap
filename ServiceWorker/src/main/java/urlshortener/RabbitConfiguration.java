@@ -49,22 +49,11 @@ public class RabbitConfiguration {
         return BindingBuilder.bind(queue).to(exchange).with(QUEUE_NAME);
     }
 
-    @Bean
-    SimpleMessageListenerContainer container(ConnectionFactory connectionFactory, Queue queue) {
-        SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
-        container.setConnectionFactory(connectionFactory);
-        container.setQueueNames(queue.getName());
-        return container;
-    }
-
     @RabbitListener(queues = RabbitConfiguration.QUEUE_NAME)
     public void onMessageFromRabbitMQ(final String messageFromRabbitMQ){
         logger.info(messageFromRabbitMQ);
-        rabbitTemplate().receiveAndReply(new ReceiveAndReplyMessageCallback() {
-            @Override
-            public Message handle(Message payload) {
-                return new Message("Hey, he recibido tu mensaje".getBytes(), new MessageProperties());
-            }
-        });
+        String queue = messageFromRabbitMQ.split(";")[1];
+        Message response = new Message("Holaaaaaaaa".getBytes(), new MessageProperties());
+        this.rabbitTemplate().send(queue, response);
     }
 }

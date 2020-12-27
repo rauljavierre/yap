@@ -1,7 +1,9 @@
 package urlshortener.endpoints;
 
+import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
+import org.springframework.amqp.core.Queue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import urlshortener.MyApplicationContextAware;
@@ -9,6 +11,7 @@ import urlshortener.services.CSVService;
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -38,23 +41,29 @@ public class CSVEndpoint {
 
         Message m = new Message(message.getBytes(), new MessageProperties());
         RabbitTemplate rabbitTemplate = (RabbitTemplate) MyApplicationContextAware.getApplicationContext().getBean("rabbitTemplate");
-        String response = "pre";
+        AmqpAdmin amqpAdmin = (AmqpAdmin) MyApplicationContextAware.getApplicationContext().getBean("amqpAdmin");
+
         try {
-            response = rabbitTemplate.sendAndReceive("", "yap.request", m).toString();
+            rabbitTemplate.send("", "yap.request", new Message((m + ";" + session.getId()).getBytes(), new MessageProperties()));
+            amqpAdmin.declareQueue(new Queue(session.getId()));
+            String response = new String(rabbitTemplate.receive(session.getId(), 15000).getBody(), StandardCharsets.UTF_8);
+
+            logger.log(Level.WARNING, "Response: " + response);
+
+            synchronized (clients) {
+                for(Session client : clients){
+                    if (client.equals(session)){
+                        client.getBasicRemote().sendText(response);
+                    }
+                }
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
             logger.log(Level.WARNING, "Exception:" + e.toString());
+            onClose(session);
         }
-        logger.log(Level.WARNING, "Response: " + response);
 
-        synchronized (clients) {
-            for(Session client : clients){
-                if (client.equals(session)){
-                    client.getBasicRemote().sendText(response);
-                }
-            }
-        }
     }
 
     @OnClose
