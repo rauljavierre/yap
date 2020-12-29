@@ -26,9 +26,9 @@ jobs:
         with:
           node-version: '12'
       - name: Launch containers and run tests
-          run: |
-            sudo bash up.sh &
-            sleep 300
-            cd ./node
-            npm install
-            npm test
+        run: |
+          sudo bash up.sh &
+          sleep 300
+          cd ./node
+          npm install
+          npm test
