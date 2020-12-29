@@ -1,0 +1,17 @@
+{
+  "name": "YapShortener",
+  "version": "1.0.0",
+  "description": "",
+  "main": "",
+  "scripts": {
+    "test": "mocha --timeout 10000 --no-deprecation"
+  },
+  "author": "",
+  "license": "",
+  "dependencies": {
+    "chai": "^4.2.0",
+    "chai-http": "^4.3.0",
+    "mocha": "^8.2.0",
+    "sleep": "^6.3.0"
+  }
+}

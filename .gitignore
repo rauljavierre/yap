@@ -7,4 +7,4 @@ build
 # Ignore IntelliJ configurations
 .idea
 
-YapShortener.jar
+.nyc_output

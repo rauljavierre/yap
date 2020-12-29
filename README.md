@@ -49,3 +49,11 @@ chmod 400 <private-key>
 ssh-add <private-key>
 ssh yapsh.tk
 ```
+
+## HOW TO EXECUTE TESTS
+```
+sudo apt-get install nodejs
+cd node
+npm install
+npm test
+```

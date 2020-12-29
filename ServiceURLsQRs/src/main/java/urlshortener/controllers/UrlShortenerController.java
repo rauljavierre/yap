@@ -47,7 +47,7 @@ public class UrlShortenerController {
         }
         if(!urlService.urlStatusIsOk(hash)){
             responseBody.put("error", urlService.getUrl(hash));
-            return new ResponseEntity<>(responseBody, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(responseBody, HttpStatus.NOT_ACCEPTABLE);
         }
 
         String url = urlService.getUrl(hash);
@@ -66,7 +66,7 @@ public class UrlShortenerController {
         String url = linkBody.getUrl();
         boolean generateQR = linkBody.getGenerateQR();
         JSONObject responseBody = new JSONObject();
-        if (url.equals("")) {
+        if (url == null || url.equals("")) {
             return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
         }
 
