@@ -37,4 +37,3 @@ sudo chown -R 472:472 grafana-data  # Fix Grafana permission trouble with volume
 
 printf "\n[up.sh] Tearing up containers\n"
 sudo docker stack deploy yap -c docker-compose.yml --prune
-sudo docker service logs yap_urlsqrs --follow
