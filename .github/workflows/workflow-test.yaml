@@ -28,6 +28,7 @@ jobs:
           node-version: '12'
       - name: Launch containers and run tests
         run: |
+          sudo docker swarm init
           sudo bash up.sh &
           sleep 300
           cd ./node
