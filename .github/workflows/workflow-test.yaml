@@ -19,7 +19,10 @@ jobs:
       - uses: actions/setup-java@v1
         with:
           java-version: 1.8
-      - uses: eskatos/gradle-command-action@v1
+      - uses: eskatos/gradle-command-action@v1+
+        with:
+          wrapper-directory: ./ServiceURLsQrs/gradle/wrapper
+          gradle-version: 6.6.1
       - uses: actions/setup-node@v2
         with:
           node-version: '12'
