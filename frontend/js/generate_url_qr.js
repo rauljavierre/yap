@@ -8,8 +8,12 @@ $(document).ready(
                 $("#result").html("");
 
                 const generateQRisChecked = document.getElementById("generateQR").checked
+                let url = document.getElementById("url").value;
+                if (!url.includes('http')) {
+                    url = 'http://' + url;
+                }
                 const requestData = {
-                    url: document.getElementById("url").value,
+                    url: url,
                     generateQR: generateQRisChecked
                 }
 

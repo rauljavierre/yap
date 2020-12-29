@@ -24,7 +24,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 @CrossOrigin
 public class QrCodeController {
 
-    private String SCHEME_HOST = "http://yapsh.tk/";
+    private String SCHEME_HOST = "http://localhost/";
 
     public QrCodeController(QRService qrService, URLService urlService) {
         this.qrService = qrService;

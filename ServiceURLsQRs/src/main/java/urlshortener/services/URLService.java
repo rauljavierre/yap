@@ -19,6 +19,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @Service
 public class URLService {
@@ -33,6 +35,8 @@ public class URLService {
     @Autowired
     private StringRedisTemplate map;
 
+    Logger logger = Logger.getLogger(URLService.class.getName());
+
     @Async
     public Future<String> isValid(String url) {
         if(url == null) {
@@ -45,9 +49,13 @@ public class URLService {
         HttpURLConnection urlConnection;
         try {
             urlConnection = (HttpURLConnection) new URL(url).openConnection();
-            urlConnection.setRequestMethod("HEAD");
+            urlConnection.setRequestMethod("GET");
+            logger.info(String.valueOf(urlConnection.getResponseCode()));
             if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 return new AsyncResult<>("URL is OK");
+            }
+            else if (urlConnection.getResponseCode() >= 300 && urlConnection.getResponseCode() <= 399){
+                return isValid(urlConnection.getHeaderField("Location"));
             }
             else {
                 return new AsyncResult<>("URL not reachable");
@@ -74,6 +82,7 @@ public class URLService {
             }
         }
         catch (TimeoutException | InterruptedException | ExecutionException e) {
+            logger.info(e.toString());
             map.opsForValue().set(hash, "URL not reachable");    // Error message
             System.out.println("Not inserting " + url + " because it is not responding");
         }

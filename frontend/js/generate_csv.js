@@ -47,6 +47,9 @@ function shortFile(urlList) {
     let socket = new WebSocket("ws://localhost/csv");
     socket.onopen = function(e) {
         urlList.forEach(function (item) {
+            if (!item.includes('http')) {
+                item = 'http://' + item;
+            }
             socket.send(item);
         });
     };

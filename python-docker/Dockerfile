@@ -1,4 +1,4 @@
 FROM python:latest
-EXPOSE 8081
+EXPOSE 8080
 WORKDIR /app
-CMD python -m http.server 8081
+CMD python -m http.server 8080

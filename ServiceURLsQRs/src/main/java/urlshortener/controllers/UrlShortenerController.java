@@ -23,7 +23,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @CrossOrigin
 public class UrlShortenerController {
 
-    private String SCHEME_HOST = "http://yapsh.tk/";
+    private String SCHEME_HOST = "http://localhost/";
 
     @Autowired
     private final URLService urlService;

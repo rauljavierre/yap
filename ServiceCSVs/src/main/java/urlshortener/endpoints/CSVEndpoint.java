@@ -66,6 +66,8 @@ public class CSVEndpoint {
         CSVService csvService = (CSVService) MyApplicationContextAware.getApplicationContext().getBean("CSVService");
         csvService.incrementNumberOfCSVs();
         logger.log(Level.WARNING, "OnClose: " + session.getId());
+        AmqpAdmin amqpAdmin = (AmqpAdmin) MyApplicationContextAware.getApplicationContext().getBean("amqpAdmin");
+        amqpAdmin.deleteQueue(session.getId());
         clients.remove(session);
     }
 
@@ -73,5 +75,7 @@ public class CSVEndpoint {
     public void onError(Session session, Throwable throwable) {
         logger.log(Level.WARNING, "OnError: " + throwable.getMessage());
         clients.remove(session);
+        AmqpAdmin amqpAdmin = (AmqpAdmin) MyApplicationContextAware.getApplicationContext().getBean("amqpAdmin");
+        amqpAdmin.deleteQueue(session.getId());
     }
 }

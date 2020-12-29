@@ -41,9 +41,19 @@ public class URLService {
         HttpURLConnection urlConnection;
         try {
             urlConnection = (HttpURLConnection) new URL(url).openConnection();
-            urlConnection.setRequestMethod("HEAD");
+            urlConnection.setRequestMethod("GET");
             if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 return new AsyncResult<>("URL is OK");
+            }
+            else if (urlConnection.getResponseCode() >= 300 && urlConnection.getResponseCode() <= 399){
+                HttpURLConnection urlConnection2 = (HttpURLConnection) new URL(urlConnection.getHeaderField("Location")).openConnection();
+                urlConnection2.setRequestMethod("GET");
+                if (urlConnection2.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    return new AsyncResult<>("URL is OK");
+                }
+                else {
+                    return new AsyncResult<>("URL not reachable");
+                }
             }
             else {
                 return new AsyncResult<>("URL not reachable");
