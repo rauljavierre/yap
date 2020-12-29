@@ -26,6 +26,7 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: '12'
+      - uses: docker-practice/actions-setup-docker@master
       - name: Launch containers and run tests
         run: |
           sudo docker swarm init
