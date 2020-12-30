@@ -22,6 +22,7 @@ describe('Integration testing', () => {
                 expect(res).to.have.status(201);
                 expect(res.body).to.have.property('url');
                 expect(res.body).to.have.property('qr');
+                expect(res.header).to.have.property('location');
 
                 hash = res.body.url.split('/').slice(-1).pop();    // get only the hash
 
@@ -96,7 +97,7 @@ describe('Integration testing', () => {
         chai.request(url)
             .get("/" + hash)
             .end((err, res) => {
-                expect(res).to.have.status(200);
+                expect(res).to.have.status(100);
                 expect(res.redirects[0]).to.contains('http://yapsh.tk/')
                 done();
             })
