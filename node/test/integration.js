@@ -221,4 +221,71 @@ describe('Integration testing', () => {
                 done();
             })
     });
+
+    it('Should do /qr/{hash} with a hash that doesn\'t exist in database and return 404', (done) => {
+        chai.request(url)
+            .get('/qr/1')
+            .end((err, res) => {
+                expect(res).to.have.status(404);
+                expect(res.body).to.have.property('error').to.be.equal('URL was not requested with /link');
+                done();
+        })
+    });
+
+    let slowHash = undefined;
+    it('Should do /link with a not slow reachable URL and return 201', (done) => {
+        chai.request(url)
+        .post('/link')
+        .send(
+            {
+                'url': 'https://techcrunch.com/',
+                'generateQR': 'true'
+            }
+        ).end((err, res) => {
+             expect(res).to.have.status(201);
+             slowHash = res.body.url.split('/').slice(-1).pop();    // get only the hash
+             done();
+         })
+    });
+
+
+    it('Should do /qr/{hash} with a hash of a url that haven\'t been validated yet in database and return 404', (done) => {
+        sleep.msleep(300)
+        chai.request(url)
+        .get('/qr/' + slowHash )
+        .end((err, res) => {
+            expect(res).to.have.status(404);
+            expect(res.body).to.have.property('error').to.not.equal("URL was not requested with /link");
+            done();
+        })
+    });
+
+
+    it('Should do /actuator/info and return 200 and QRs should be 4 and URLs should be 2', (done) => {
+        sleep.sleep(3)
+        chai.request(url)
+            .get('/actuator/info')
+            .end((err, res) => {
+                expect(res).to.have.status(200);
+                expect(res.body).to.have.property('URLs').to.be.equal('2');
+                expect(res.body).to.have.property('QRs').to.be.equal('4');
+                expect(res.body).to.have.property('CSVs').to.be.equal(null);
+                expect(res.body).to.have.property('timestamp');
+
+                done();
+            })
+    });
+
+    it('Should do /qr/{hash} with a hash that exist in database and returns 200', (done) => {
+            sleep.msleep(2000)
+            chai.request(url)
+            .get('/qr/' + hash )
+            .end((err, res) => {
+                expect(res).to.have.status(200);
+                expect(res.header).to.have.property('cache-control').to.be.equal("CacheControl [max-age=31536000, must-revalidate, no-transform]");
+                done();
+            })
+        });
+
+
 });
