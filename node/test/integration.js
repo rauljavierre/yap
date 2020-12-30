@@ -8,6 +8,20 @@ chai.use(chaiHttp);
 
 describe('Integration testing', () => {
 
+    it('Should do /actuator/info and return 200 and all entities are null', (done) => {
+        chai.request(url)
+            .get('/actuator/info')
+            .end((err, res) => {
+                expect(res).to.have.status(200);
+                expect(res.body).to.have.property('URLs').to.be.equal(null);
+                expect(res.body).to.have.property('QRs').to.be.equal(null);
+                expect(res.body).to.have.property('CSVs').to.be.equal(null);
+                expect(res.body).to.have.property('timestamp');
+
+                done();
+            })
+    });
+
     let hash = undefined;
     it('Should do /link with a reachable URL and requesting a QR and return 201', (done) => {
         chai.request(url)
@@ -25,6 +39,21 @@ describe('Integration testing', () => {
                 expect(res.header).to.have.property('location');
 
                 hash = res.body.url.split('/').slice(-1).pop();    // get only the hash
+
+                done();
+            })
+    });
+
+    it('Should do /actuator/info and return 200 and QRs should be 1 and URLs should be 1', (done) => {
+        sleep.sleep(2)
+        chai.request(url)
+            .get('/actuator/info')
+            .end((err, res) => {
+                expect(res).to.have.status(200);
+                expect(res.body).to.have.property('URLs').to.be.equal('1');
+                expect(res.body).to.have.property('QRs').to.be.equal('1');
+                expect(res.body).to.have.property('CSVs').to.be.equal(null);
+                expect(res.body).to.have.property('timestamp');
 
                 done();
             })
@@ -51,6 +80,7 @@ describe('Integration testing', () => {
             })
     });
 
+
     let malformedHash = undefined;
     it('Should do /link with a malformed URL and return 201', (done) => {
         chai.request(url)
@@ -67,6 +97,21 @@ describe('Integration testing', () => {
                 expect(res.body).to.have.property('qr');
 
                 malformedHash = res.body.url.split('/').slice(-1).pop();    // get only the hash
+
+                done();
+            })
+    });
+
+    it('Should do /actuator/info and return 200 and QRs should be 2 and URLs should be 1', (done) => {
+        sleep.sleep(2)
+        chai.request(url)
+            .get('/actuator/info')
+            .end((err, res) => {
+                expect(res).to.have.status(200);
+                expect(res.body).to.have.property('URLs').to.be.equal('1');
+                expect(res.body).to.have.property('QRs').to.be.equal('2');
+                expect(res.body).to.have.property('CSVs').to.be.equal(null);
+                expect(res.body).to.have.property('timestamp');
 
                 done();
             })
@@ -92,6 +137,22 @@ describe('Integration testing', () => {
                 done();
             })
     });
+
+    it('Should do /actuator/info and return 200 and QRs should be 3 and URLs should be 1', (done) => {
+        sleep.sleep(2)
+        chai.request(url)
+            .get('/actuator/info')
+            .end((err, res) => {
+                expect(res).to.have.status(200);
+                expect(res.body).to.have.property('URLs').to.be.equal('1');
+                expect(res.body).to.have.property('QRs').to.be.equal('3');
+                expect(res.body).to.have.property('CSVs').to.be.equal(null);
+                expect(res.body).to.have.property('timestamp');
+
+                done();
+            })
+    });
+
 
     it('Should do a redirect with that URL and return 200', (done) => {
         sleep.sleep(2)
@@ -142,6 +203,21 @@ describe('Integration testing', () => {
             )
             .end((err, res) => {
                 expect(res).to.have.status(400);
+                done();
+            })
+    });
+
+    it('Should do /actuator/info and return 200 and QRs should be 3 and URLs should be 1', (done) => {
+        sleep.sleep(2)
+        chai.request(url)
+            .get('/actuator/info')
+            .end((err, res) => {
+                expect(res).to.have.status(200);
+                expect(res.body).to.have.property('URLs').to.be.equal('1');
+                expect(res.body).to.have.property('QRs').to.be.equal('3');
+                expect(res.body).to.have.property('CSVs').to.be.equal(null);
+                expect(res.body).to.have.property('timestamp');
+
                 done();
             })
     });
