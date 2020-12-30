@@ -54,6 +54,7 @@ ssh yapsh.tk
 ```
 sudo apt-get install nodejs
 cd node
+sudo apt-get install npm
 npm install
 npm test
 ```
