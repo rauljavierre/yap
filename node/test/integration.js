@@ -1,8 +1,11 @@
 const chai = require('chai');
 const chaiHttp = require('chai-http');
 const expect = require('chai').expect;
-const url = "http://localhost"
 const sleep = require('sleep');
+const WebSocket = require('ws');
+
+const url = "http://localhost"
+const socketUrl = "ws://localhost/csv"
 
 chai.use(chaiHttp);
 
@@ -287,5 +290,162 @@ describe('Integration testing', () => {
             })
         });
 
+    // CSV with WebSockets
+    var client1, client2, client3;
 
+    it('Should send a long URL via WebSockets and return a valid short URL', (done) => {
+        let testingUrl = "https://google.es/";
+        client1 = new WebSocket(socketUrl);
+        client1.onmessage = function(event) {
+            let msg = event.data;
+            let responseLongUrl = msg.split(",")[0];
+            let responseShortUrl = msg.split(",")[1];
+            let responseStatus = msg.split(",")[2];
+            let hash = responseShortUrl.split("/")[3];
+            expect(responseLongUrl).to.equal(testingUrl);
+            expect(responseStatus).to.be.empty;
+            client1.close(1000, "WebSocket Closed");
+            sleep.sleep(3);
+            chai.request(url)
+                .get("/" + hash)
+                .end((err, res) => {
+                    expect(res).to.have.status(200);
+                    expect(res.redirects[0]).to.contains(testingUrl);
+                    done();
+                })
+        };
+        client1.onopen = function(e) {
+            client1.send(testingUrl);
+        }
+    });
+
+    it('Should send a malformed URL via WebSockets and return an error response', (done) => {
+        let testingUrl = "gugelpuntocom";
+        client2 = new WebSocket(socketUrl);
+        client2.onmessage = function(event) {
+            let msg = event.data;
+            let responseLongUrl = msg.split(",")[0];
+            let responseShortUrl = msg.split(",")[1];
+            let responseStatus = msg.split(",")[2];
+            expect(responseLongUrl).to.equal(testingUrl);
+            expect(responseStatus).to.be.equal("URL is malformed");
+            expect(responseShortUrl).to.be.empty;
+            client2.close(1000, "WebSocket Closed");
+            done();
+        };
+        client2.onopen = function(e) {
+            client2.send(testingUrl);
+        }
+    });
+
+    it('Should send a non reachable URL via WebSockets and return an error response', (done) => {
+        let testingUrl = "https://urlquenoesalcanzable.com";
+        client3 = new WebSocket(socketUrl);
+        client3.onmessage = function(event) {
+            let msg = event.data;
+            let responseLongUrl = msg.split(",")[0];
+            let responseShortUrl = msg.split(",")[1];
+            let responseStatus = msg.split(",")[2];
+            expect(responseLongUrl).to.equal(testingUrl);
+            expect(responseStatus).to.be.equal("URL not reachable");
+            expect(responseShortUrl).to.be.empty;
+            client3.close(1000, "WebSocket Closed");
+            done();
+        };
+        client3.onopen = function(e) {
+            client3.send(testingUrl);
+        }
+    });
+
+    // Actuator metrics
+
+    it('Should get the metric http server requests of a CSV worker', (done) => {
+        chai.request(url)
+            .get('/actuator/metrics/http.server.requests')
+            .end((err, res) => {
+                expect(res).to.have.status(200);
+                expect(res.body).to.have.property('name').to.be.equal("http.server.requests");
+                done();
+            })
+    });
+
+    it('Should get the metric jvm memory committed of a CSV worker', (done) => {
+        chai.request(url)
+            .get('/actuator/metrics/jvm.memory.committed')
+            .end((err, res) => {
+                expect(res).to.have.status(200);
+                expect(res.body).to.have.property('name').to.be.equal("jvm.memory.committed");
+                done();
+            })
+    });
+
+    it('Should get the metric jvm memory max of a CSV worker', (done) => {
+        chai.request(url)
+            .get('/actuator/metrics/jvm.memory.max')
+            .end((err, res) => {
+                expect(res).to.have.status(200);
+                expect(res.body).to.have.property('name').to.be.equal("jvm.memory.max");
+                done();
+            })
+    });
+
+    it('Should get the metric jvm memory used of a CSV worker', (done) => {
+        chai.request(url)
+            .get('/actuator/metrics/jvm.memory.used')
+            .end((err, res) => {
+                expect(res).to.have.status(200);
+                expect(res.body).to.have.property('name').to.be.equal("jvm.memory.used");
+                done();
+            })
+    });
+
+    it('Should get the metric jvm threads live of a CSV worker', (done) => {
+        chai.request(url)
+            .get('/actuator/metrics/jvm.threads.live')
+            .end((err, res) => {
+                expect(res).to.have.status(200);
+                expect(res.body).to.have.property('name').to.be.equal("jvm.threads.live");
+                done();
+            })
+    });
+
+    it('Should get the metric process cpu usage of a CSV worker', (done) => {
+        chai.request(url)
+            .get('/actuator/metrics/process.cpu.usage')
+            .end((err, res) => {
+                expect(res).to.have.status(200);
+                expect(res.body).to.have.property('name').to.be.equal("process.cpu.usage");
+                done();
+            })
+    });
+
+    it('Should get the metric process uptime of a CSV worker', (done) => {
+        chai.request(url)
+            .get('/actuator/metrics/process.uptime')
+            .end((err, res) => {
+                expect(res).to.have.status(200);
+                expect(res.body).to.have.property('name').to.be.equal("process.uptime");
+                done();
+            })
+    });
+
+    it('Should get the metric system cpu usage of a CSV worker', (done) => {
+        chai.request(url)
+            .get('/actuator/metrics/system.cpu.usage')
+            .end((err, res) => {
+                expect(res).to.have.status(200);
+                expect(res.body).to.have.property('name').to.be.equal("system.cpu.usage");
+                done();
+            })
+    });
+
+    it('Should get the metric system load average 1m of a CSV worker', (done) => {
+        chai.request(url)
+            .get('/actuator/metrics/system.load.average.1m')
+            .end((err, res) => {
+                expect(res).to.have.status(200);
+                expect(res.body).to.have.property('name').to.be.equal("system.load.average.1m");
+                done();
+            })
+    });
 });
