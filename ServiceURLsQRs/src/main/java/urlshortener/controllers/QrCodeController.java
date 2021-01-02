@@ -7,6 +7,7 @@ import org.springframework.http.*;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
 import urlshortener.services.QRService;
 import org.springframework.stereotype.Controller;
 import java.io.IOException;
@@ -19,8 +20,7 @@ import urlshortener.services.URLService;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
-@Controller
-//@EnableSwagger2
+@RestController
 @CrossOrigin
 public class QrCodeController {
 
