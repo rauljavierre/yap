@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
-@Controller
+@RestController
 @CrossOrigin
 public class UrlShortenerController {
 
