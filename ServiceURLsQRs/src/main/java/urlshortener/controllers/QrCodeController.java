@@ -37,6 +37,23 @@ public class QrCodeController {
     @Autowired
     private final URLService urlService;
 
+    @Operation(summary = "Returns a base64 string of a QR image given a short URL")
+    @ApiResponses(
+    value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Returns the QR image",
+                    content =
+                    @Content(
+                            mediaType = "image/png",
+                            schema = @Schema(implementation = ResponseEntity.class))),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "The short URL is invalid or not validated yet",
+                    content = @Content(mediaType = "application/json")),
+
+            @ApiResponse(responseCode = "500", content = @Content)
+    })
     @GetMapping(value = "/qr/{hash}")
     public ResponseEntity<?> qr(@PathVariable String hash) throws IOException, WriterException {
         System.out.println("/qr/" + hash);

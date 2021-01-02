@@ -41,6 +41,27 @@ public class UrlShortenerController {
         this.qrService = qrService;
     }
 
+    @Operation(summary = "Redirects to an URL given a short URL")
+    @ApiResponses(
+    value = {
+            @ApiResponse(
+                    responseCode = "307",
+                    description = "Redirect to the URL",
+                    content =
+                    @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ResponseEntity.class))),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "The short URL is invalid",
+                    content = @Content(mediaType = "application/json")),
+            @ApiResponse(
+                    responseCode = "406",
+                    description = "The URL is not been validated yet",
+                    content = @Content(mediaType = "application/json")),
+
+            @ApiResponse(responseCode = "500", content = @Content)
+    })
     @GetMapping("{hash}")
     public ResponseEntity<JSONObject> redirectTo(@PathVariable String hash) {
         System.out.println("/hash");
