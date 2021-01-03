@@ -8,24 +8,20 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.Link;
+import springfox.documentation.swagger2.annotations.EnableSwagger2;
 import org.springframework.http.*;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import urlshortener.domain.LinkBody;
 import urlshortener.services.QRService;
 import urlshortener.services.URLService;
-
 import java.io.IOException;
 import java.net.URI;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
 @RestController
 @CrossOrigin
+@EnableSwagger2
 public class UrlShortenerController {
 
     private String SCHEME_HOST = "http://localhost/";
@@ -46,15 +42,13 @@ public class UrlShortenerController {
     value = {
             @ApiResponse(
                     responseCode = "307",
-                    description = "Redirect to the URL",
-                    content =
-                    @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = ResponseEntity.class))),
+                    description = "Redirect to the URL"),
+
             @ApiResponse(
                     responseCode = "404",
                     description = "The short URL is invalid",
                     content = @Content(mediaType = "application/json")),
+
             @ApiResponse(
                     responseCode = "406",
                     description = "The URL is not been validated yet",

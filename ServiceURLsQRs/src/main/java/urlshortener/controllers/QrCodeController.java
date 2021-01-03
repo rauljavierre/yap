@@ -7,26 +7,22 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.Link;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
+import springfox.documentation.swagger2.annotations.EnableSwagger2;
 import urlshortener.services.QRService;
-import org.springframework.stereotype.Controller;
 import java.io.IOException;
 import java.net.URI;
 import java.util.concurrent.TimeUnit;
-
 import com.google.zxing.WriterException;
 import urlshortener.services.URLService;
 
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-
 @RestController
 @CrossOrigin
+@EnableSwagger2
 public class QrCodeController {
 
     private String SCHEME_HOST = "http://localhost/";
