@@ -5,6 +5,7 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.core.Queue;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RestController;
 import urlshortener.MyApplicationContextAware;
 import urlshortener.services.CSVService;
 import javax.websocket.*;
@@ -18,7 +19,7 @@ import java.util.logging.Logger;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 @ServerEndpoint(value = "/csv")
-@Controller
+@RestController
 public class CSVEndpoint {
 
     // https://www.byteslounge.com/tutorials/java-ee-html5-websockets-with-multiple-clients-example
