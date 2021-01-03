@@ -15,7 +15,10 @@ import urlshortener.domain.LinkBody;
 import urlshortener.services.QRService;
 import urlshortener.services.URLService;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URLDecoder;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
@@ -131,5 +134,28 @@ public class UrlShortenerController {
         urlService.insertURLIntoREDIS(hash, url, urlStatus);
 
         return new ResponseEntity<>(responseBody, responseHeaders, HttpStatus.CREATED);
+    }
+
+    @RequestMapping(value = "/check", method = RequestMethod.GET)
+    public ResponseEntity<JSONObject> check(@RequestParam String url) throws ExecutionException, InterruptedException, UnsupportedEncodingException {
+        System.out.println("/check");
+
+        JSONObject responseBody = new JSONObject();
+        HttpHeaders responseHeaders = new HttpHeaders();
+
+        if (url.equals("")) {
+            return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+        }
+
+        url = URLDecoder.decode(url, "UTF-8");
+
+        Future<String> isValid = urlService.isValid(url);
+        responseBody.put("isValid", isValid.get());
+        responseBody.put("url", url);
+
+        CacheControl cacheControl = CacheControl.maxAge(60*30, TimeUnit.SECONDS).noTransform().mustRevalidate();
+        responseHeaders.setCacheControl(cacheControl.toString());
+
+        return new ResponseEntity<>(responseBody, HttpStatus.OK);
     }
 }

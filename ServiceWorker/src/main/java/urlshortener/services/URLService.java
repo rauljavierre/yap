@@ -30,59 +30,10 @@ public class URLService {
     private StringRedisTemplate map;
 
     @Async
-    public Future<String> isValid(String url) {
-        if(url == null) {
-            return new AsyncResult<>("URL is null");
-        }
-        if(!(url.startsWith("http://") || url.startsWith("https://"))){
-            return new AsyncResult<>("URL is malformed");
-        }
-
-        HttpURLConnection urlConnection;
-        try {
-            urlConnection = (HttpURLConnection) new URL(url).openConnection();
-            urlConnection.setRequestMethod("GET");
-            if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                return new AsyncResult<>("URL is OK");
-            }
-            else if (urlConnection.getResponseCode() >= 300 && urlConnection.getResponseCode() <= 399){
-                HttpURLConnection urlConnection2 = (HttpURLConnection) new URL(urlConnection.getHeaderField("Location")).openConnection();
-                urlConnection2.setRequestMethod("GET");
-                if (urlConnection2.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                    return new AsyncResult<>("URL is OK");
-                }
-                else {
-                    return new AsyncResult<>("URL not reachable");
-                }
-            }
-            else {
-                return new AsyncResult<>("URL not reachable");
-            }
-        }
-        catch (IOException e){
-            return new AsyncResult<>("URL not reachable");
-        }
-    }
-
-    @Async
-    public void insertURLIntoREDIS(String hash, String url, Future<String> urlStatus) {
-        try {
-            map.opsForValue().set(hash, "URL not validated yet");
-            String status = urlStatus.get(10, TimeUnit.SECONDS);
-            if (status.equals("URL is OK")) {
-                map.opsForValue().set(hash, url);       // http://
-                map.opsForValue().increment("URLs");
-                System.out.println("Inserting " + url + " with hash " + hash);
-            }
-            else {
-                map.opsForValue().set(hash, status);    // Error message
-                System.out.println("Not inserting " + url + " because " + status);
-            }
-        }
-        catch (TimeoutException | InterruptedException | ExecutionException e) {
-            map.opsForValue().set(hash, "URL not reachable");    // Error message
-            System.out.println("Not inserting " + url + " because it is not responding");
-        }
+    public void insertURLIntoREDIS(String hash, String url, String status) {
+        map.opsForValue().set(hash, url);       // http://
+        map.opsForValue().increment("URLs");
+        System.out.println("Inserting " + url + " with hash " + hash);
     }
 
     public String generateHashFromURL(String url) {

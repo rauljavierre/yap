@@ -1,5 +1,6 @@
 package urlshortener;
 
+import org.json.simple.parser.ParseException;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
@@ -9,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import urlshortener.services.CSVService;
+
+import java.io.IOException;
 import java.util.logging.Logger;
 
 @Configuration
@@ -45,7 +48,7 @@ public class RabbitConfiguration {
     }
 
     @RabbitListener(queues = QUEUE_NAME)
-    public void onMessageFromRabbitMQ(final String messageFromRabbitMQ){
+    public void onMessageFromRabbitMQ(final String messageFromRabbitMQ) throws IOException, InterruptedException, ParseException {
         logger.info(messageFromRabbitMQ);
         String url = messageFromRabbitMQ.split(";")[0];
         String queue = messageFromRabbitMQ.split(";")[1];

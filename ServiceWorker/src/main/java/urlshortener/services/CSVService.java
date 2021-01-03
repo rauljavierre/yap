@@ -1,15 +1,21 @@
 package urlshortener.services;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeoutException;
+import java.io.BufferedReader;
+import java.io.IOException;
+
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 @Service
 public class CSVService {
@@ -21,8 +27,7 @@ public class CSVService {
     @Autowired
     private URLService urlService;
 
-    public String generateCSVLine(String url) {
-
+    public String generateCSVLine(String url) throws IOException, InterruptedException, ParseException {
         String hash = urlService.generateHashFromURL(url);
         if(urlService.urlExists(hash)) {
             if (urlService.getUrl(hash).equals(url)){
@@ -30,20 +35,27 @@ public class CSVService {
             }
         }
 
-        Future<String> urlStatus = urlService.isValid(url);
         String response = url + ",";
 
-        String urlStatusResult = "";
-        try {
-            urlStatusResult = urlStatus.get(15000, MILLISECONDS);
-
-        } catch (TimeoutException | InterruptedException | ExecutionException e) {
-            logger.log(Level.WARNING, e.getClass().getName());  // TimeoutException with stress tests...
-            return response + "," + "URL not reachable";
+        String urlEncoded = URLEncoder.encode(url, "UTF-8");
+        HttpURLConnection urlConnection = (HttpURLConnection) new URL("http://yap_nginx/check?url=" + urlEncoded).openConnection();
+        urlConnection.setRequestMethod("GET");
+        BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+        StringBuilder sb = new StringBuilder();
+        String line;
+        while ((line = br.readLine()) != null) {
+            sb.append(line);
         }
+        String urlStatusResult = sb.toString();
+        logger.info(urlStatusResult);
+        JSONParser jsonParser = new JSONParser();
+        JSONObject json = (JSONObject) jsonParser.parse(urlStatusResult);
+        urlStatusResult = json.get("isValid").toString();
+
+        logger.info(urlStatusResult);
 
         if (urlStatusResult.equals("URL is OK")) {
-            urlService.insertURLIntoREDIS(hash,url,urlStatus);
+            urlService.insertURLIntoREDIS(hash,url,urlStatusResult);
             String newShortURL = SCHEME_HOST + hash;
             response = response + newShortURL + "," ;
         }

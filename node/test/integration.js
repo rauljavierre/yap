@@ -11,6 +11,45 @@ chai.use(chaiHttp);
 
 describe('Integration testing', () => {
 
+    it('Should do /check with a valid url', (done) => {
+        chai.request(url)
+            .get('/check?url=' + encodeURI('http://yapsh.tk/'))
+            .end((err, res) => {
+                expect(res).to.have.status(200);
+                expect(res.body).to.have.property('isValid').to.be.equal("URL is OK");
+                done();
+            })
+    });
+
+    it('Should do /check with an empty url', (done) => {
+        chai.request(url)
+            .get('/check?url=')
+            .end((err, res) => {
+                expect(res).to.have.status(400);
+                done();
+            })
+    });
+
+    it('Should do /check with an null url', (done) => {
+        chai.request(url)
+            .get('/check')
+            .send({})
+            .end((err, res) => {
+                expect(res).to.have.status(400);
+                done();
+            })
+    });
+
+    it('Should do /check with a malformed url', (done) => {
+        chai.request(url)
+            .get('/check?url=' + encodeURI('httdddp://yapsh.tk/'))
+            .end((err, res) => {
+                expect(res).to.have.status(200);
+                expect(res.body).to.have.property('isValid').to.be.equal("URL is malformed");
+                done();
+            })
+    });
+
     it('Should do /actuator/info and return 200 and all entities are null', (done) => {
         chai.request(url)
             .get('/actuator/info')
@@ -158,7 +197,7 @@ describe('Integration testing', () => {
 
 
     it('Should do a redirect with that URL and return 200', (done) => {
-        sleep.sleep(2)
+        sleep.sleep(4)
         chai.request(url)
             .get("/" + hash)
             .end((err, res) => {
