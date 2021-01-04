@@ -724,7 +724,8 @@ describe('Integration testing', () => {
     });
 
     it('Should tear down all the Spring Boot Microservices', (done) => {
-        exec('sudo docker service scale yap_urlsqrs=0 && sudo docker service scale yap_csvsmaster=0 && sudo docker service scale yap_csvsworker=0', (err, stdout, stderr) => {
+        exec('sudo docker service scale yap_csvsworker=0 && sudo docker service scale yap_urlsqrs=0 && sudo docker service scale yap_csvsmaster=0', (err, stdout, stderr) => {
+            sleep.sleep(15)
             if (err) {
                 console.error(err)
             }
@@ -760,6 +761,7 @@ describe('Integration testing', () => {
 
     it('Should tear up again all the Spring Boot Microservices', (done) => {
         exec('sudo docker service scale yap_csvsworker=1 && sudo docker service scale yap_csvsmaster=1 && sudo docker service scale yap_urlsqrs=1', (err, stdout, stderr) => {
+            sleep.sleep(30)
             if (err) {
                 console.error(err)
             }
