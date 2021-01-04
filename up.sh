@@ -37,3 +37,6 @@ sudo chown -R 472:472 grafana-data  # Fix Grafana permission trouble with volume
 
 printf "\n[up.sh] Tearing up containers\n"
 sudo docker stack deploy yap -c docker-compose.yml --prune
+
+# Start monitoring -> reescale CSV workers if necessary
+# sudo bash monitor.sh

@@ -28,7 +28,6 @@ public class CSVEndpoint {
 
     Logger logger = Logger.getLogger(CSVEndpoint.class.getName());
 
-
     @OnOpen
     public void onOpen(Session session) {
         logger.log(Level.WARNING, "OnOpen: " + session.getId());
@@ -40,7 +39,6 @@ public class CSVEndpoint {
     @OnMessage
     public void onMessage(Session session, String message) {
         logger.log(Level.WARNING, "onMessage: " + message);
-
         RabbitTemplate rabbitTemplate = (RabbitTemplate) MyApplicationContextAware.getApplicationContext().getBean("rabbitTemplate");
 
         try {
@@ -65,9 +63,9 @@ public class CSVEndpoint {
 
     @OnClose
     public void onClose(Session session) {
+        logger.log(Level.WARNING, "OnClose: " + session.getId());
         CSVService csvService = (CSVService) MyApplicationContextAware.getApplicationContext().getBean("CSVService");
         csvService.incrementNumberOfCSVs();
-        logger.log(Level.WARNING, "OnClose: " + session.getId());
         AmqpAdmin amqpAdmin = (AmqpAdmin) MyApplicationContextAware.getApplicationContext().getBean("amqpAdmin");
         amqpAdmin.deleteQueue(session.getId());
         clients.remove(session);

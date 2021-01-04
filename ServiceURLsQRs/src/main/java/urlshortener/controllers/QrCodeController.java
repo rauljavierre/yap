@@ -59,7 +59,6 @@ public class QrCodeController {
     public ResponseEntity<?> qr(@PathVariable String hash) throws IOException, WriterException {
         System.out.println("/qr/" + hash);
 
-
         if (!urlService.urlExists(hash)){
             JSONObject responseBody = new JSONObject();
             responseBody.put("error", "URL was not requested with /link");
@@ -70,7 +69,7 @@ public class QrCodeController {
             responseBody.put("error", urlService.getUrl(hash));
             return new ResponseEntity<>(responseBody, HttpStatus.NOT_FOUND);
         }
-        //Link link = linkTo(UrlShortenerController.class).slash(hash).withSelfRel();
+
         String urlLocation = SCHEME_HOST + hash;
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.setLocation(URI.create(urlLocation));
@@ -78,16 +77,13 @@ public class QrCodeController {
         byte[] qrBase64;
         if(qrService.qrExists(hash)) {
             qrBase64 = qrService.getQR(hash);
-
-            // Cache the response only if the QR is not null
-            CacheControl cacheControl = CacheControl.maxAge(60*60*24*365, TimeUnit.SECONDS).noTransform().mustRevalidate();
-            responseHeaders.setCacheControl(cacheControl.toString());
         }
         else {
-            // qrBase64 may be null: polling with intervals in frontend
             qrBase64 = qrService.generateAndStoreQR(urlLocation, hash);
         }
 
+        CacheControl cacheControl = CacheControl.maxAge(60*60*24*365, TimeUnit.SECONDS).noTransform().mustRevalidate();
+        responseHeaders.setCacheControl(cacheControl.toString());
         responseHeaders.setContentType(MediaType.IMAGE_PNG);
         return new ResponseEntity<>(qrBase64, responseHeaders, HttpStatus.OK);
     }

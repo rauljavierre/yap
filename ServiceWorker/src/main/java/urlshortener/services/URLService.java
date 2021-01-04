@@ -4,17 +4,9 @@ import com.google.common.hash.Hashing;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
-
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+
 
 @Service
 public class URLService {
@@ -30,7 +22,7 @@ public class URLService {
     private StringRedisTemplate map;
 
     @Async
-    public void insertURLIntoREDIS(String hash, String url, String status) {
+    public void insertURLIntoREDIS(String hash, String url) {
         map.opsForValue().set(hash, url);       // http://
         map.opsForValue().increment("URLs");
         System.out.println("Inserting " + url + " with hash " + hash);

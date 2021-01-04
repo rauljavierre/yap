@@ -53,8 +53,8 @@ ssh yapsh.tk
 ## HOW TO EXECUTE TESTS
 ```
 sudo apt-get install nodejs
-cd node
 sudo apt-get install npm
+cd node
 npm install
-npm test
+sudo npm run test
 ```

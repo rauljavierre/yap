@@ -3,6 +3,7 @@ const chaiHttp = require('chai-http');
 const expect = require('chai').expect;
 const sleep = require('sleep');
 const WebSocket = require('ws');
+const { exec } = require('child_process');
 
 const url = "http://localhost"
 const socketUrl = "ws://localhost/csv"
@@ -10,7 +11,6 @@ const socketUrl = "ws://localhost/csv"
 chai.use(chaiHttp);
 
 describe('Integration testing', () => {
-
     it('Should do /check with a valid url', (done) => {
         chai.request(url)
             .get('/check?url=' + encodeURI('http://yapsh.tk/'))
@@ -329,8 +329,7 @@ describe('Integration testing', () => {
             })
         });
 
-    // CSV with WebSockets
-    var client1, client2, client3;
+    let client1, client2, client3;
 
     it('Should send a long URL via WebSockets and return a valid short URL', (done) => {
         let testingUrl = "https://google.es/";
@@ -395,8 +394,6 @@ describe('Integration testing', () => {
             client3.send(testingUrl);
         }
     });
-
-    // Actuator metrics
 
     it('Should get the metric http server requests of a CSV worker', (done) => {
         chai.request(url)
@@ -486,5 +483,353 @@ describe('Integration testing', () => {
                 expect(res.body).to.have.property('name').to.be.equal("system.load.average.1m");
                 done();
             })
+    });
+
+    it('Should do /link with a reachable URL without specifying property "generateQR" and return 201', (done) => {
+        chai.request(url)
+            .post('/link')
+            .send(
+                {
+                    'url': 'http://yapsh.tk/'
+                }
+            )
+            .end((err, res) => {
+                expect(res).to.have.status(201);
+                expect(res.body).to.have.property('url');
+                expect(res.body).not.to.have.property('qr');
+                expect(res.header).to.have.property('location');
+
+                hash = res.body.url.split('/').slice(-1).pop();    // get only the hash
+
+                done();
+            })
+    });
+
+    it('Should scale the CSV worker microservice (2)', (done) => {
+        exec('sudo docker service scale yap_csvsworker=2', (err, stdout, stderr) => {
+            if (err) {
+                console.error(err)
+            }
+            else {
+                exec('sudo docker ps -a | grep yap_csvsworker | grep Up | wc -l', (err, stdout, stderr) => {
+                    if (err) {
+                        console.error(err)
+                    }
+                    else {
+                        expect(parseInt(stdout)).to.be.equal(2);
+                        done();
+                    }
+                });
+            }
+        });
+    });
+
+    it('Should send a long URL via WebSockets and return a valid short URL with 2 workers', (done) => {
+        let testingUrl = "https://google.es/";
+        client1 = new WebSocket(socketUrl);
+        client1.onmessage = function(event) {
+            let msg = event.data;
+            let responseLongUrl = msg.split(",")[0];
+            let responseShortUrl = msg.split(",")[1];
+            let responseStatus = msg.split(",")[2];
+            let hash = responseShortUrl.split("/")[3];
+            expect(responseLongUrl).to.equal(testingUrl);
+            expect(responseStatus).to.be.empty;
+            client1.close(1000, "WebSocket Closed");
+            sleep.sleep(3);
+            chai.request(url)
+                .get("/" + hash)
+                .end((err, res) => {
+                    expect(res).to.have.status(200);
+                    expect(res.redirects[0]).to.contains(testingUrl);
+                    done();
+                })
+        };
+        client1.onopen = function(e) {
+            client1.send(testingUrl);
+        }
+    });
+
+    it('Should send a malformed URL via WebSockets and return an error response with 2 workers', (done) => {
+        let testingUrl = "gugelpuntocom";
+        client2 = new WebSocket(socketUrl);
+        client2.onmessage = function(event) {
+            let msg = event.data;
+            let responseLongUrl = msg.split(",")[0];
+            let responseShortUrl = msg.split(",")[1];
+            let responseStatus = msg.split(",")[2];
+            expect(responseLongUrl).to.equal(testingUrl);
+            expect(responseStatus).to.be.equal("URL is malformed");
+            expect(responseShortUrl).to.be.empty;
+            client2.close(1000, "WebSocket Closed");
+            done();
+        };
+        client2.onopen = function(e) {
+            client2.send(testingUrl);
+        }
+    });
+
+    it('Should send a non reachable URL via WebSockets and return an error response with 2 workers', (done) => {
+        let testingUrl = "https://urlquenoesalcanzable.com";
+        client3 = new WebSocket(socketUrl);
+        client3.onmessage = function(event) {
+            let msg = event.data;
+            let responseLongUrl = msg.split(",")[0];
+            let responseShortUrl = msg.split(",")[1];
+            let responseStatus = msg.split(",")[2];
+            expect(responseLongUrl).to.equal(testingUrl);
+            expect(responseStatus).to.be.equal("URL not reachable");
+            expect(responseShortUrl).to.be.empty;
+            client3.close(1000, "WebSocket Closed");
+            done();
+        };
+        client3.onopen = function(e) {
+            client3.send(testingUrl);
+        }
+    });
+
+    it('Should send 20000 long URLs via WebSockets and return all the short URLs with 2 workers', (done) => {
+        let testingUrl = "https://google.es/";
+        let received = 0;
+
+        client1 = new WebSocket(socketUrl);
+        client1.onmessage = function(event) {
+            received += 1
+            let msg = event.data;
+            let responseLongUrl = msg.split(",")[0];
+            let responseStatus = msg.split(",")[2];
+            expect(responseLongUrl).to.equal(testingUrl);
+            expect(responseStatus).to.be.empty;
+
+            if (received === 20000) {
+                client1.close(1000, "WebSocket Closed");
+                done()
+            }
+        };
+
+        client1.onopen = function(e) {
+            for (i = 0; i < 20000; i++) {
+                client1.send(testingUrl);
+            }
+        }
+    });
+
+    it('Should scale the CSV worker microservice (5)', (done) => {
+        exec('sudo docker service scale yap_csvsworker=5', (err, stdout, stderr) => {
+            if (err) {
+                console.error(err)
+            }
+            else {
+                exec('sudo docker ps -a | grep yap_csvsworker | grep Up | wc -l', (err, stdout, stderr) => {
+                    if (err) {
+                        console.error(err)
+                    }
+                    else {
+                        expect(parseInt(stdout)).to.be.equal(5);
+                        done();
+                    }
+                });
+            }
+        });
+    });
+
+    it('Should send a long URL via WebSockets and return a valid short URL with 5 workers', (done) => {
+        let testingUrl = "https://google.es/";
+        client1 = new WebSocket(socketUrl);
+        client1.onmessage = function(event) {
+            let msg = event.data;
+            let responseLongUrl = msg.split(",")[0];
+            let responseShortUrl = msg.split(",")[1];
+            let responseStatus = msg.split(",")[2];
+            let hash = responseShortUrl.split("/")[3];
+            expect(responseLongUrl).to.equal(testingUrl);
+            expect(responseStatus).to.be.empty;
+            client1.close(1000, "WebSocket Closed");
+            sleep.sleep(3);
+            chai.request(url)
+                .get("/" + hash)
+                .end((err, res) => {
+                    expect(res).to.have.status(200);
+                    expect(res.redirects[0]).to.contains(testingUrl);
+                    done();
+                })
+        };
+        client1.onopen = function(e) {
+            client1.send(testingUrl);
+        }
+    });
+
+    it('Should send a malformed URL via WebSockets and return an error response with 5 workers', (done) => {
+        let testingUrl = "gugelpuntocom";
+        client2 = new WebSocket(socketUrl);
+        client2.onmessage = function(event) {
+            let msg = event.data;
+            let responseLongUrl = msg.split(",")[0];
+            let responseShortUrl = msg.split(",")[1];
+            let responseStatus = msg.split(",")[2];
+            expect(responseLongUrl).to.equal(testingUrl);
+            expect(responseStatus).to.be.equal("URL is malformed");
+            expect(responseShortUrl).to.be.empty;
+            client2.close(1000, "WebSocket Closed");
+            done();
+        };
+        client2.onopen = function(e) {
+            client2.send(testingUrl);
+        }
+    });
+
+    it('Should send a non reachable URL via WebSockets and return an error response with 5 workers', (done) => {
+        let testingUrl = "https://urlquenoesalcanzable.com";
+        client3 = new WebSocket(socketUrl);
+        client3.onmessage = function(event) {
+            let msg = event.data;
+            let responseLongUrl = msg.split(",")[0];
+            let responseShortUrl = msg.split(",")[1];
+            let responseStatus = msg.split(",")[2];
+            expect(responseLongUrl).to.equal(testingUrl);
+            expect(responseStatus).to.be.equal("URL not reachable");
+            expect(responseShortUrl).to.be.empty;
+            client3.close(1000, "WebSocket Closed");
+            done();
+        };
+        client3.onopen = function(e) {
+            client3.send(testingUrl);
+        }
+    });
+
+    it('Should send 50000 long URLs via WebSockets and return all the short URLs with 5 workers', (done) => {
+        let testingUrl = "https://google.es/";
+        let received = 0;
+
+        client1 = new WebSocket(socketUrl);
+        client1.onmessage = function(event) {
+            received += 1
+            let msg = event.data;
+            let responseLongUrl = msg.split(",")[0];
+            let responseStatus = msg.split(",")[2];
+            expect(responseLongUrl).to.equal(testingUrl);
+            expect(responseStatus).to.be.empty;
+
+            if (received === 50000) {
+                client1.close(1000, "WebSocket Closed");
+                done()
+            }
+        };
+
+        client1.onopen = function(e) {
+            for (i = 0; i < 50000; i++) {
+                client1.send(testingUrl);
+            }
+        }
+    });
+
+    it('Should tear down all the Spring Boot Microservices', (done) => {
+        exec('sudo docker service scale yap_urlsqrs=0 && sudo docker service scale yap_csvsmaster=0 && sudo docker service scale yap_csvsworker=0', (err, stdout, stderr) => {
+            if (err) {
+                console.error(err)
+            }
+            else {
+                exec('sudo docker ps -a | grep yap_urlsqrs | grep Up | wc -l', (err, stdout, stderr) => {
+                    if (err) {
+                        console.error(err)
+                    }
+                    else {
+                        expect(parseInt(stdout)).to.be.equal(0);
+                    }
+                });
+                exec('sudo docker ps -a | grep yap_csvsmaster | grep Up | wc -l', (err, stdout, stderr) => {
+                    if (err) {
+                        console.error(err)
+                    }
+                    else {
+                        expect(parseInt(stdout)).to.be.equal(0);
+                    }
+                });
+                exec('sudo docker ps -a | grep yap_csvsworker | grep Up | wc -l', (err, stdout, stderr) => {
+                    if (err) {
+                        console.error(err)
+                    }
+                    else {
+                        expect(parseInt(stdout)).to.be.equal(0);
+                    }
+                });
+                done();
+            }
+        });
+    });
+
+    it('Should tear up again all the Spring Boot Microservices', (done) => {
+        exec('sudo docker service scale yap_urlsqrs=1 && sudo docker service scale yap_csvsmaster=1 && sudo docker service scale yap_csvsworker=1', (err, stdout, stderr) => {
+            if (err) {
+                console.error(err)
+            }
+            else {
+                exec('sudo docker ps -a | grep yap_urlsqrs | grep Up | wc -l', (err, stdout, stderr) => {
+                    if (err) {
+                        console.error(err)
+                    }
+                    else {
+                        expect(parseInt(stdout)).to.be.equal(1);
+                    }
+                });
+                exec('sudo docker ps -a | grep yap_csvsmaster | grep Up | wc -l', (err, stdout, stderr) => {
+                    if (err) {
+                        console.error(err)
+                    }
+                    else {
+                        expect(parseInt(stdout)).to.be.equal(1);
+                    }
+                });
+                exec('sudo docker ps -a | grep yap_csvsworker | grep Up | wc -l', (err, stdout, stderr) => {
+                    if (err) {
+                        console.error(err)
+                    }
+                    else {
+                        expect(parseInt(stdout)).to.be.equal(1);
+                    }
+                });
+                done();
+            }
+        });
+    });
+
+    it('Should NOT had lost the information of the database and the system should be operative again', (done) => {
+        sleep.sleep(3)
+        chai.request(url)
+            .get('/actuator/info')
+            .end((err, res) => {
+                expect(res).to.have.status(200);
+                expect(res.body).to.have.property('URLs').to.be.equal('3');
+                expect(res.body).to.have.property('QRs').to.be.equal('4');
+                expect(res.body).to.have.property('CSVs').to.be.equal(null);
+                expect(res.body).to.have.property('timestamp');
+                done();
+            })
+    });
+
+    it('Should send 10000 long URLs via WebSockets and return all the short URLs with 1 worker after the reset of the microservices', (done) => {
+        let testingUrl = "https://google.es/";
+        let received = 0;
+
+        client1 = new WebSocket(socketUrl);
+        client1.onmessage = function(event) {
+            received += 1
+            let msg = event.data;
+            let responseLongUrl = msg.split(",")[0];
+            let responseStatus = msg.split(",")[2];
+            expect(responseLongUrl).to.equal(testingUrl);
+            expect(responseStatus).to.be.empty;
+
+            if (received === 10000) {
+                client1.close(10000, "WebSocket Closed");
+                done()
+            }
+        };
+
+        client1.onopen = function(e) {
+            for (i = 0; i < 10000; i++) {
+                client1.send(testingUrl);
+            }
+        }
     });
 });

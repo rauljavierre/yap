@@ -4,7 +4,7 @@
   "description": "",
   "main": "",
   "scripts": {
-    "test": "mocha --timeout 10000 --no-deprecation"
+    "test": "mocha --timeout 180000 --no-deprecation"
   },
   "author": "",
   "license": "",
