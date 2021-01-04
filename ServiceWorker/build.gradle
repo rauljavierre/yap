@@ -27,6 +27,16 @@ repositories {
     mavenCentral()
 }
 
+ext {
+    set('springCloudVersion', "Hoxton.SR8")
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
 dependencies {
     implementation 'com.google.guava:guava:28.0-jre'
     implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -65,4 +75,7 @@ dependencies {
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    // Hystrix
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-hystrix'
 }

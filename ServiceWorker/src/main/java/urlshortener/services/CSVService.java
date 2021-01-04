@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 @Service
 public class CSVService {
@@ -22,8 +23,8 @@ public class CSVService {
 
     public String generateCSVLine(String url) throws IOException, ParseException {
         String hash = urlService.generateHashFromURL(url);
-        if(urlService.urlExists(hash)) {
-            if (urlService.getUrl(hash).equals(url)){
+        if (urlService.urlExists(hash)) {
+            if (urlService.getUrl(hash).equals(url)) {
                 return url + "," + SCHEME_HOST + hash + ",";
             }
         }
@@ -32,9 +33,9 @@ public class CSVService {
 
         String response = url + ",";
         if (urlStatusResult.equals("URL is OK")) {
-            urlService.insertURLIntoREDIS(hash,url);
+            urlService.insertURLIntoREDIS(hash, url);
             String newShortURL = SCHEME_HOST + hash;
-            response = response + newShortURL + "," ;
+            response = response + newShortURL + ",";
         }
         else {
             response = response + "," + urlStatusResult;
@@ -44,6 +45,7 @@ public class CSVService {
     }
 
     // Using another microservice to check if the URL given is reachable or not
+    @HystrixCommand(fallbackMethod = "reliableIsValid")
     private String isValid(String url) throws IOException, ParseException {
         String urlEncoded = URLEncoder.encode(url, "UTF-8");
         HttpURLConnection urlConnection = (HttpURLConnection) new URL("http://yap_nginx/check?url=" + urlEncoded).openConnection();
@@ -60,5 +62,9 @@ public class CSVService {
 
         // The result is given in the property "isValid" of the response
         return json.get("isValid").toString();
+    }
+
+    private String reliableIsValid(String url) {
+        return "PleaseTryAgain";
     }
 }

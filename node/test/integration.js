@@ -801,7 +801,7 @@ describe('Integration testing', () => {
                 expect(res).to.have.status(200);
                 expect(res.body).to.have.property('URLs').to.be.equal('3');
                 expect(res.body).to.have.property('QRs').to.be.equal('4');
-                expect(res.body).to.have.property('CSVs').to.be.equal(null);
+                expect(res.body).to.have.property('CSVs').to.be.equal('11');
                 expect(res.body).to.have.property('timestamp');
                 done();
             })
@@ -821,7 +821,7 @@ describe('Integration testing', () => {
             expect(responseStatus).to.be.empty;
 
             if (received === 10000) {
-                client1.close(10000, "WebSocket Closed");
+                client1.close(1000, "WebSocket Closed");
                 done()
             }
         };
