@@ -759,7 +759,7 @@ describe('Integration testing', () => {
     });
 
     it('Should tear up again all the Spring Boot Microservices', (done) => {
-        exec('sudo docker service scale yap_urlsqrs=1 && sudo docker service scale yap_csvsmaster=1 && sudo docker service scale yap_csvsworker=1', (err, stdout, stderr) => {
+        exec('sudo docker service scale yap_csvsworker=1 && sudo docker service scale yap_csvsmaster=1 && sudo docker service scale yap_urlsqrs=1', (err, stdout, stderr) => {
             if (err) {
                 console.error(err)
             }
@@ -794,7 +794,7 @@ describe('Integration testing', () => {
     });
 
     it('Should NOT had lost the information of the database and the system should be operative again', (done) => {
-        sleep.sleep(3)
+        sleep.sleep(30)
         chai.request(url)
             .get('/actuator/info')
             .end((err, res) => {
