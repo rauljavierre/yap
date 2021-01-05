@@ -879,18 +879,19 @@ describe('Integration testing', () => {
 
     it('Should send a long URL via WebSockets and return a "try again" response without cascade failures', (done) => {
         let testingUrl = "https://google.com/";
-        client1 = new WebSocket(socketUrl);
-        client1.onmessage = function(event) {
+        client2 = new WebSocket(socketUrl);
+        client2.onmessage = function(event) {
+            console.log(event.data)
             let msg = event.data;
             let responseLongUrl = msg.split(",")[0];
             let responseStatus = msg.split(",")[2];
             expect(responseLongUrl).to.equal(testingUrl);
             expect(responseStatus).to.be.equal('PleaseTryAgain');
-            client1.close(1000, "WebSocket Closed");
+            client2.close(1000, "WebSocket Closed");
             done();
         };
-        client1.onopen = function(e) {
-            client1.send(testingUrl);
+        client2.onopen = function(e) {
+            client2.send(testingUrl);
         }
     });
 
