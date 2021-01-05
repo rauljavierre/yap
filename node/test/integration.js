@@ -10,7 +10,9 @@ const socketUrl = "ws://localhost/csv"
 
 chai.use(chaiHttp);
 
+
 describe('Integration testing', () => {
+
     it('Should do /check with a valid url', (done) => {
         chai.request(url)
             .get('/check?url=' + encodeURI('http://yapsh.tk/'))
@@ -588,7 +590,7 @@ describe('Integration testing', () => {
         }
     });
 
-    it('Should send 20000 long URLs via WebSockets and return all the short URLs with 2 workers', (done) => {
+    it('Should send 1000 long URLs via WebSockets and return all the short URLs with 2 workers', (done) => {
         let testingUrl = "https://google.es/";
         let received = 0;
 
@@ -601,14 +603,14 @@ describe('Integration testing', () => {
             expect(responseLongUrl).to.equal(testingUrl);
             expect(responseStatus).to.be.empty;
 
-            if (received === 20000) {
+            if (received === 1000) {
                 client1.close(1000, "WebSocket Closed");
                 done()
             }
         };
 
         client1.onopen = function(e) {
-            for (i = 0; i < 20000; i++) {
+            for (i = 0; i < 1000; i++) {
                 client1.send(testingUrl);
             }
         }
@@ -697,7 +699,7 @@ describe('Integration testing', () => {
         }
     });
 
-    it('Should send 50000 long URLs via WebSockets and return all the short URLs with 5 workers', (done) => {
+    it('Should send 1000 long URLs via WebSockets and return all the short URLs with 5 workers', (done) => {
         let testingUrl = "https://google.es/";
         let received = 0;
 
@@ -710,14 +712,14 @@ describe('Integration testing', () => {
             expect(responseLongUrl).to.equal(testingUrl);
             expect(responseStatus).to.be.empty;
 
-            if (received === 50000) {
+            if (received === 1000) {
                 client1.close(1000, "WebSocket Closed");
                 done()
             }
         };
 
         client1.onopen = function(e) {
-            for (i = 0; i < 50000; i++) {
+            for (i = 0; i < 1000; i++) {
                 client1.send(testingUrl);
             }
         }
@@ -809,7 +811,7 @@ describe('Integration testing', () => {
             })
     });
 
-    it('Should send 10000 long URLs via WebSockets and return all the short URLs with 1 worker after the reset of the microservices', (done) => {
+    it('Should send 1000 long URLs via WebSockets and return all the short URLs with 1 worker after the reset of the microservices', (done) => {
         let testingUrl = "https://google.es/";
         let received = 0;
 
@@ -822,16 +824,93 @@ describe('Integration testing', () => {
             expect(responseLongUrl).to.equal(testingUrl);
             expect(responseStatus).to.be.empty;
 
-            if (received === 10000) {
+            if (received === 1000) {
                 client1.close(1000, "WebSocket Closed");
                 done()
             }
         };
 
         client1.onopen = function(e) {
-            for (i = 0; i < 10000; i++) {
+            for (i = 0; i < 1000; i++) {
                 client1.send(testingUrl);
             }
         }
+    });
+
+    it('Should tear down the URLs and QRs microservice', (done) => {
+        exec('sudo docker service scale yap_urlsqrs=0', (err, stdout, stderr) => {
+            sleep.sleep(15)
+            if (err) {
+                console.error(err)
+            }
+            else {
+                exec('sudo docker ps -a | grep yap_urlsqrs | grep Up | wc -l', (err, stdout, stderr) => {
+                    if (err) {
+                        console.error(err)
+                    }
+                    else {
+                        expect(parseInt(stdout)).to.be.equal(0);
+                    }
+                });
+                done();
+            }
+        });
+    });
+
+    it('Should send a long URL via WebSockets and return a valid stored response without cascade failures', (done) => {
+        let testingUrl = "https://google.es/";
+        client1 = new WebSocket(socketUrl);
+        client1.onmessage = function(event) {
+            let msg = event.data;
+            let responseLongUrl = msg.split(",")[0];
+            let responseShortUrl = msg.split(",")[1];
+            let responseStatus = msg.split(",")[2];
+            let hash = responseShortUrl.split("/")[3];
+            expect(responseLongUrl).to.equal(testingUrl);
+            expect(responseStatus).to.be.empty;
+            expect(hash).not.to.be.empty;
+            client1.close(1000, "WebSocket Closed");
+            done();
+        };
+        client1.onopen = function(e) {
+            client1.send(testingUrl);
+        }
+    });
+
+    it('Should send a long URL via WebSockets and return a "try again" response without cascade failures', (done) => {
+        let testingUrl = "https://google.com/";
+        client1 = new WebSocket(socketUrl);
+        client1.onmessage = function(event) {
+            let msg = event.data;
+            let responseLongUrl = msg.split(",")[0];
+            let responseStatus = msg.split(",")[2];
+            expect(responseLongUrl).to.equal(testingUrl);
+            expect(responseStatus).to.be.equal('PleaseTryAgain');
+            client1.close(1000, "WebSocket Closed");
+            done();
+        };
+        client1.onopen = function(e) {
+            client1.send(testingUrl);
+        }
+    });
+
+    it('Should tear up the URLs and QRs microservice', (done) => {
+        exec('sudo docker service scale yap_urlsqrs=1', (err, stdout, stderr) => {
+            sleep.sleep(15)
+            if (err) {
+                console.error(err)
+            }
+            else {
+                exec('sudo docker ps -a | grep yap_urlsqrs | grep Up | wc -l', (err, stdout, stderr) => {
+                    if (err) {
+                        console.error(err)
+                    }
+                    else {
+                        expect(parseInt(stdout)).to.be.equal(1);
+                    }
+                });
+                done();
+            }
+        });
     });
 });

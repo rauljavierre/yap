@@ -11,7 +11,6 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 @Service
 public class CSVService {
@@ -45,12 +44,17 @@ public class CSVService {
     }
 
     // Using another microservice to check if the URL given is reachable or not
-    @HystrixCommand(fallbackMethod = "reliableIsValid")
     private String isValid(String url) throws IOException, ParseException {
         String urlEncoded = URLEncoder.encode(url, "UTF-8");
-        HttpURLConnection urlConnection = (HttpURLConnection) new URL("http://yap_nginx/check?url=" + urlEncoded).openConnection();
-        urlConnection.setRequestMethod("GET");
-        BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+        BufferedReader br;
+        try {
+            HttpURLConnection urlConnection = (HttpURLConnection) new URL("http://yap_nginx/check?url=" + urlEncoded).openConnection();
+            urlConnection.setRequestMethod("GET");
+            br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+        }
+        catch (Exception e) {
+            return reliableIsValid();
+        }
         StringBuilder sb = new StringBuilder();
         String line;
         while ((line = br.readLine()) != null) {
@@ -64,7 +68,7 @@ public class CSVService {
         return json.get("isValid").toString();
     }
 
-    private String reliableIsValid(String url) {
+    private String reliableIsValid() {
         return "PleaseTryAgain";
     }
 }

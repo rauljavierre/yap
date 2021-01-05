@@ -1,5 +1,6 @@
 package urlshortener.endpoints;
 
+import org.springframework.amqp.AmqpResourceNotAvailableException;
 import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
@@ -39,26 +40,32 @@ public class CSVEndpoint {
     @OnMessage
     public void onMessage(Session session, String message) {
         logger.log(Level.WARNING, "onMessage: " + message);
-        RabbitTemplate rabbitTemplate = (RabbitTemplate) MyApplicationContextAware.getApplicationContext().getBean("rabbitTemplate");
+        Runnable myRunnable =
+            () -> {
+                RabbitTemplate rabbitTemplate = (RabbitTemplate) MyApplicationContextAware.getApplicationContext().getBean("rabbitTemplate");
+                logger.log(Level.WARNING, "session: " + session.getId());
 
-        try {
-            rabbitTemplate.send("", "yap.request", new Message((message + ";"  + session.getId()).getBytes(), new MessageProperties()));
-            String response = new String(rabbitTemplate.receive(session.getId(), 15000).getBody(), StandardCharsets.UTF_8);
-            logger.log(Level.WARNING, "Response: " + response);
+                try {
+                    rabbitTemplate.send("", "yap.request",
+                            new Message((message + ";"  + session.getId()).getBytes(), new MessageProperties()));
+                    String response = new String(
+                            rabbitTemplate.receive(session.getId(), 15000).getBody(), StandardCharsets.UTF_8);
+                    logger.log(Level.WARNING, "Response: " + response);
 
-            synchronized (clients) {
-                for(Session client : clients){
-                    if (client.equals(session)){
-                        client.getBasicRemote().sendText(response);
+                    synchronized (clients) {
+                        for(Session client : clients){
+                            if (client.equals(session)){
+                                client.getBasicRemote().sendText(response);
+                            }
+                        }
                     }
                 }
-            }
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            logger.log(Level.WARNING, "Exception:" + e.toString());
-            onClose(session);
-        }
+                catch (Exception e) {
+                    onError(session, e);
+                }
+            };
+        Thread thread = new Thread(myRunnable);
+        thread.start();
     }
 
     @OnClose
