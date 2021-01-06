@@ -873,23 +873,6 @@ describe('Integration testing', () => {
         }
     });
 
-    it('Should send a long URL via WebSockets and return a "try again" response without cascade failures', (done) => {
-        let testingUrl = "https://google.com/";
-        client2 = new WebSocket(socketUrl);
-        client2.onmessage = function(event) {
-            let msg = event.data;
-            let responseLongUrl = msg.split(",")[0];
-            let responseStatus = msg.split(",")[2];
-            expect(responseLongUrl).to.equal(testingUrl);
-            expect(responseStatus).to.be.equal('PleaseTryAgain');
-            client2.close(1000, "WebSocket Closed");
-            done();
-        };
-        client2.onopen = function(e) {
-            client2.send(testingUrl);
-        }
-    });
-
     it('Should tear up the URLs and QRs microservice', (done) => {
         exec('sudo docker service scale yap_urlsqrs=1', (err, stdout, stderr) => {
             if (err) {
