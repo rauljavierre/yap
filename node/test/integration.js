@@ -917,10 +917,6 @@ describe('Integration testing', () => {
         client1 = new WebSocket(socketUrl);
         client1.onmessage = function (event) {
             received += 1
-            let msg = event.data;
-            let responseStatus = msg.split(",")[2];
-            expect(responseStatus).to.be.empty;
-
             if (received === 1000) {
                 client1.close(1000, "WebSocket Closed");
                 done()
@@ -961,10 +957,6 @@ describe('Integration testing', () => {
         client1 = new WebSocket(socketUrl);
         client1.onmessage = function (event) {
             received += 1
-            let msg = event.data;
-            let responseStatus = msg.split(",")[2];
-            expect(responseStatus).to.be.empty;
-
             if (received === 1000) {
                 client1.close(1000, "WebSocket Closed");
                 done()
