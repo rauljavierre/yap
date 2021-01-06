@@ -44,7 +44,7 @@ function shortFile(urlList) {
     let responseList = ""
     // Send each URL to the server
     let counter = 0;
-    let socket = new WebSocket("ws://localhost/csv");
+    let socket = new WebSocket("ws://yapsh.tk/csv");
     socket.onopen = function(e) {
         urlList.forEach(function (item) {
             if (!item.includes('http')) {

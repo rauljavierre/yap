@@ -25,7 +25,7 @@ import urlshortener.services.URLService;
 @EnableSwagger2
 public class QrCodeController {
 
-    private String SCHEME_HOST = "http://localhost/";
+    private String SCHEME_HOST = "http://yapsh.tk/";
 
     public QrCodeController(QRService qrService, URLService urlService) {
         this.qrService = qrService;

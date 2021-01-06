@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 @EnableSwagger2
 public class UrlShortenerController {
 
-    private String SCHEME_HOST = "http://localhost/";
+    private String SCHEME_HOST = "http://yapsh.tk/";
 
     @Autowired
     private final URLService urlService;

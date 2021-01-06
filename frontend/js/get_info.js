@@ -3,7 +3,7 @@ $(document).ready(get_info);
 function get_info() {
     $.ajax({
         type: "GET",
-        url: "http://localhost/actuator/info",
+        url: "http://yapsh.tk/actuator/info",
         success: function (json) {
             let urls = json.URLs == null ? 0 : json.URLs
             let qrs = json.QRs == null ? 0 : json.QRs
