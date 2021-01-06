@@ -727,7 +727,6 @@ describe('Integration testing', () => {
 
     it('Should tear down all the Spring Boot Microservices', (done) => {
         exec('sudo docker service scale yap_csvsworker=0 && sudo docker service scale yap_urlsqrs=0 && sudo docker service scale yap_csvsmaster=0', (err, stdout, stderr) => {
-            sleep.sleep(15)
             if (err) {
                 console.error(err)
             }
@@ -763,7 +762,6 @@ describe('Integration testing', () => {
 
     it('Should tear up again all the Spring Boot Microservices', (done) => {
         exec('sudo docker service scale yap_csvsworker=1 && sudo docker service scale yap_csvsmaster=1 && sudo docker service scale yap_urlsqrs=1', (err, stdout, stderr) => {
-            sleep.sleep(30)
             if (err) {
                 console.error(err)
             }
@@ -839,7 +837,6 @@ describe('Integration testing', () => {
 
     it('Should tear down the URLs and QRs microservice', (done) => {
         exec('sudo docker service scale yap_urlsqrs=0', (err, stdout, stderr) => {
-            sleep.sleep(15)
             if (err) {
                 console.error(err)
             }
@@ -896,7 +893,6 @@ describe('Integration testing', () => {
 
     it('Should tear up the URLs and QRs microservice', (done) => {
         exec('sudo docker service scale yap_urlsqrs=1', (err, stdout, stderr) => {
-            sleep.sleep(15)
             if (err) {
                 console.error(err)
             }
@@ -915,7 +911,7 @@ describe('Integration testing', () => {
     });
 
     it('Should send 1000 different long URLs via WebSockets and return all the short URLs with 1 worker after the reset of the microservices', (done) => {
-        let testingUrl = "https://www.instagram.com/";
+        let testingUrl = "https://github.com/";
         let received = 0;
 
         client1 = new WebSocket(socketUrl);
@@ -958,8 +954,8 @@ describe('Integration testing', () => {
         });
     });
 
-    it('Should send 1000 long URLs via WebSockets and return all the short URLs with 2 workers after the reset of the microservices', (done) => {
-        let testingUrl = "https://www.instagram.com/different";
+    it('Should send 1000 different long URLs via WebSockets and return all the short URLs with 2 workers after the reset of the microservices', (done) => {
+        let testingUrl = "https://github.com/different";
         let received = 0;
 
         client1 = new WebSocket(socketUrl);
