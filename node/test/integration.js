@@ -294,7 +294,6 @@ describe('Integration testing', () => {
 
 
     it('Should do /qr/{hash} with a hash of a url that haven\'t been validated yet in database and return 404', (done) => {
-        sleep.msleep(300)
         chai.request(url)
         .get('/qr/' + slowHash )
         .end((err, res) => {
