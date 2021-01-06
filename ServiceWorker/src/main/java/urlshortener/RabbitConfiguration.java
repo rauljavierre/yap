@@ -46,8 +46,8 @@ public class RabbitConfiguration {
         return new TopicExchange(EXCHANGE_NAME);
     }
 
-    @RabbitListener(queues = QUEUE_NAME)
-    public void onMessageFromRabbitMQ(final String messageFromRabbitMQ) throws IOException, InterruptedException, ParseException {
+    @RabbitListener(queues = QUEUE_NAME, concurrency = "16")
+    public void onMessageFromRabbitMQ(final String messageFromRabbitMQ) throws IOException, ParseException {
         logger.info(messageFromRabbitMQ);
         String url = messageFromRabbitMQ.split(";")[0];
         String queue = messageFromRabbitMQ.split(";")[1];

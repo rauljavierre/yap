@@ -15,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -64,8 +65,8 @@ public class CSVEndpoint {
                     onError(session, e);
                 }
             };
-        Thread thread = new Thread(myRunnable);
-        thread.start();
+        ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) MyApplicationContextAware.getApplicationContext().getBean("executor");
+        threadPoolExecutor.execute(myRunnable);
     }
 
     @OnClose

@@ -616,8 +616,8 @@ describe('Integration testing', () => {
         }
     });
 
-    it('Should scale the CSV worker microservice (5)', (done) => {
-        exec('sudo docker service scale yap_csvsworker=5', (err, stdout, stderr) => {
+    it('Should scale the CSV worker microservice (2)', (done) => {
+        exec('sudo docker service scale yap_csvsworker=2', (err, stdout, stderr) => {
             if (err) {
                 console.error(err)
             }
@@ -627,7 +627,7 @@ describe('Integration testing', () => {
                         console.error(err)
                     }
                     else {
-                        expect(parseInt(stdout)).to.be.equal(5);
+                        expect(parseInt(stdout)).to.be.equal(2);
                         done();
                     }
                 });
@@ -635,7 +635,7 @@ describe('Integration testing', () => {
         });
     });
 
-    it('Should send a long URL via WebSockets and return a valid short URL with 5 workers', (done) => {
+    it('Should send a long URL via WebSockets and return a valid short URL with 2 workers', (done) => {
         let testingUrl = "https://google.es/";
         client1 = new WebSocket(socketUrl);
         client1.onmessage = function(event) {
@@ -661,7 +661,7 @@ describe('Integration testing', () => {
         }
     });
 
-    it('Should send a malformed URL via WebSockets and return an error response with 5 workers', (done) => {
+    it('Should send a malformed URL via WebSockets and return an error response with 2 workers', (done) => {
         let testingUrl = "gugelpuntocom";
         client2 = new WebSocket(socketUrl);
         client2.onmessage = function(event) {
@@ -680,7 +680,7 @@ describe('Integration testing', () => {
         }
     });
 
-    it('Should send a non reachable URL via WebSockets and return an error response with 5 workers', (done) => {
+    it('Should send a non reachable URL via WebSockets and return an error response with 2 workers', (done) => {
         let testingUrl = "https://urlquenoesalcanzable.com";
         client3 = new WebSocket(socketUrl);
         client3.onmessage = function(event) {
@@ -699,7 +699,7 @@ describe('Integration testing', () => {
         }
     });
 
-    it('Should send 1000 long URLs via WebSockets and return all the short URLs with 5 workers', (done) => {
+    it('Should send 1000 long URLs via WebSockets and return all the short URLs with 2 workers', (done) => {
         let testingUrl = "https://google.es/";
         let received = 0;
 
@@ -881,7 +881,6 @@ describe('Integration testing', () => {
         let testingUrl = "https://google.com/";
         client2 = new WebSocket(socketUrl);
         client2.onmessage = function(event) {
-            console.log(event.data)
             let msg = event.data;
             let responseLongUrl = msg.split(",")[0];
             let responseStatus = msg.split(",")[2];
@@ -913,5 +912,73 @@ describe('Integration testing', () => {
                 done();
             }
         });
+    });
+
+    it('Should send 1000 different long URLs via WebSockets and return all the short URLs with 1 worker after the reset of the microservices', (done) => {
+        let testingUrl = "https://www.instagram.com/";
+        let received = 0;
+
+        client1 = new WebSocket(socketUrl);
+        client1.onmessage = function (event) {
+            received += 1
+            let msg = event.data;
+            let responseStatus = msg.split(",")[2];
+            expect(responseStatus).to.be.empty;
+
+            if (received === 1000) {
+                client1.close(1000, "WebSocket Closed");
+                done()
+            }
+        };
+
+        client1.onopen = function (e) {
+            for (i = 0; i < 1000; i++) {
+                client1.send(testingUrl + i);
+            }
+        }
+    });
+
+    it('Should scale the CSV worker microservice (2)', (done) => {
+        exec('sudo docker service scale yap_csvsworker=2', (err, stdout, stderr) => {
+            if (err) {
+                console.error(err)
+            }
+            else {
+                exec('sudo docker ps -a | grep yap_csvsworker | grep Up | wc -l', (err, stdout, stderr) => {
+                    if (err) {
+                        console.error(err)
+                    }
+                    else {
+                        expect(parseInt(stdout)).to.be.equal(2);
+                        sleep.sleep(10)
+                        done();
+                    }
+                });
+            }
+        });
+    });
+
+    it('Should send 1000 long URLs via WebSockets and return all the short URLs with 2 workers after the reset of the microservices', (done) => {
+        let testingUrl = "https://www.instagram.com/different";
+        let received = 0;
+
+        client1 = new WebSocket(socketUrl);
+        client1.onmessage = function (event) {
+            received += 1
+            let msg = event.data;
+            let responseStatus = msg.split(",")[2];
+            expect(responseStatus).to.be.empty;
+
+            if (received === 1000) {
+                client1.close(1000, "WebSocket Closed");
+                done()
+            }
+        };
+
+        client1.onopen = function (e) {
+            for (i = 0; i < 1000; i++) {
+                client1.send(testingUrl + i);
+            }
+        }
     });
 });
