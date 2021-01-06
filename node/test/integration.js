@@ -15,7 +15,7 @@ describe('Integration testing', () => {
 
     it('Should do /check with a valid url', (done) => {
         chai.request(url)
-            .get('/check?url=' + encodeURI('http://yapsh.tk/'))
+            .get('/check?url=' + encodeURI('https://instagram.com/'))
             .end((err, res) => {
                 expect(res).to.have.status(200);
                 expect(res.body).to.have.property('isValid').to.be.equal("URL is OK");
@@ -72,7 +72,7 @@ describe('Integration testing', () => {
             .post('/link')
             .send(
                 {
-                    'url': 'http://yapsh.tk/',
+                    'url': 'https://www.instagram.com/',
                     'generateQR': 'true'
                 }
             )
@@ -108,7 +108,7 @@ describe('Integration testing', () => {
             .post('/link')
             .send(
                 {
-                    'url': 'http://yapsh.tk/',
+                    'url': 'https://www.instagram.com/',
                     'generateQR': 'false'
                 }
             )
@@ -131,7 +131,7 @@ describe('Integration testing', () => {
             .post('/link')
             .send(
                 {
-                    'url': 'httpd://yapsh.tk/',
+                    'url': 'httpfs://www.instagram.com/',
                     'generateQR': 'true'
                 }
             )
@@ -204,7 +204,7 @@ describe('Integration testing', () => {
             .get("/" + hash)
             .end((err, res) => {
                 expect(res).to.have.status(200);
-                expect(res.redirects[0]).to.contains('http://yapsh.tk/')
+                expect(res.redirects[0]).to.contains('https://www.instagram.com/')
                 done();
             })
     });
@@ -492,7 +492,7 @@ describe('Integration testing', () => {
             .post('/link')
             .send(
                 {
-                    'url': 'http://yapsh.tk/'
+                    'url': 'https://www.instagram.com/'
                 }
             )
             .end((err, res) => {
