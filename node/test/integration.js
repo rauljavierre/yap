@@ -306,6 +306,25 @@ describe('Integration testing', () => {
         })
     });
 
+    it('Should do /qr/{hash} with a hash of a malformed url and return 406', (done) => {
+        chai.request(url)
+        .get('/qr/' + malformedHash )
+        .end((err, res) => {
+            expect(res).to.have.status(406);
+            expect(res.body).to.have.property('error').to.be.equal('URL is malformed');
+            done();
+        })
+    });
+    
+    it('Should do /qr/{hash} with a hash of a not reachable url and return 406', (done) => {
+        chai.request(url)
+        .get('/qr/' + notReachableHash )
+        .end((err, res) => {
+            expect(res).to.have.status(406);
+            expect(res.body).to.have.property('error').to.be.equal('URL is not reachable');
+            done();
+        })
+    });
 
     it('Should do /actuator/info and return 200 and QRs should be 4 and URLs should be 2', (done) => {
         sleep.sleep(3)
