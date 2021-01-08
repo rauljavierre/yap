@@ -215,6 +215,7 @@ describe('Integration testing', () => {
             .get("/" + malformedHash)
             .end((err, res) => {
                 expect(res).to.have.status(406);
+                expect(res.body).to.have.property('error').to.be.equal('URL is malformed');
                 done();
             })
     });
@@ -225,6 +226,7 @@ describe('Integration testing', () => {
             .get("/" + notReachableHash)
             .end((err, res) => {
                 expect(res).to.have.status(406);
+                expect(res.body).to.have.property('error').to.be.equal('URL not reachable');
                 done();
             })
     });
@@ -235,6 +237,7 @@ describe('Integration testing', () => {
             .get("/" + "notRequestHash")
             .end((err, res) => {
                 expect(res).to.have.status(404);
+                expect(res.body).to.have.property('error').to.be.equal('URL was not requested with /link');
                 done();
             })
     });
