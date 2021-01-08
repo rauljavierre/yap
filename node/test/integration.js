@@ -280,12 +280,12 @@ describe('Integration testing', () => {
     });
 
     let slowHash = undefined;
-    it('Should do /link with a not slow reachable URL and return 201', (done) => {
+    it('Should do /link with a slow reachable URL and return 201', (done) => {
         chai.request(url)
         .post('/link')
         .send(
             {
-                'url': 'https://techcrunch.com/',
+                'url': 'http://slowwly.robertomurray.co.uk/delay/5000/url/http://www.google.co.uk',
                 'generateQR': 'true'
             }
         ).end((err, res) => {
@@ -295,15 +295,25 @@ describe('Integration testing', () => {
          })
     });
 
-
-    it('Should do /qr/{hash} with a hash of a url that haven\'t been validated yet in database and return 404', (done) => {
+    it('Should do /qr/{hash} with a hash of a url that hasn\'t been validated yet and return 406', (done) => {
+        sleep.sleep(1)
         chai.request(url)
-        .get('/qr/' + slowHash )
+        .get('/qr/' + slowHash)
         .end((err, res) => {
-            expect(res).to.have.status(404);
-            expect(res.body).to.have.property('error').to.not.equal("URL was not requested with /link");
+            expect(res).to.have.status(406);
+            expect(res.body).to.have.property('error').to.equal("URL not validated yet");
             done();
         })
+    });
+
+    it('Should NOT do a redirect with a URL that hasn\'t been validated yet and return 406', (done) => {
+        chai.request(url)
+            .get('/' + slowHash)
+            .end((err, res) => {
+                expect(res).to.have.status(406);
+                expect(res.body).to.have.property('error').to.equal("URL not validated yet");
+                done();
+            })
     });
 
     it('Should do /qr/{hash} with a hash of a malformed url and return 406', (done) => {
@@ -321,13 +331,13 @@ describe('Integration testing', () => {
         .get('/qr/' + notReachableHash )
         .end((err, res) => {
             expect(res).to.have.status(406);
-            expect(res.body).to.have.property('error').to.be.equal('URL is not reachable');
+            expect(res.body).to.have.property('error').to.be.equal('URL not reachable');
             done();
         })
     });
 
     it('Should do /actuator/info and return 200 and QRs should be 4 and URLs should be 2', (done) => {
-        sleep.sleep(3)
+        sleep.sleep(10)
         chai.request(url)
             .get('/actuator/info')
             .end((err, res) => {

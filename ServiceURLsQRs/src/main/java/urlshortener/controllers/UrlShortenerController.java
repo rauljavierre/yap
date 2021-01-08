@@ -54,7 +54,7 @@ public class UrlShortenerController {
 
             @ApiResponse(
                     responseCode = "406",
-                    description = "The URL has not been validated yet",
+                    description = "The URL is malformed, not reachable or is being validated",
                     content = @Content(mediaType = "application/json")),
 
             @ApiResponse(responseCode = "500", content = @Content)

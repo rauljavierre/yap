@@ -50,7 +50,12 @@ public class QrCodeController {
                             schema = @Schema(implementation = ResponseEntity.class))),
             @ApiResponse(
                     responseCode = "404",
-                    description = "The short URL is invalid or not validated yet",
+                    description = "The short URL was not requested with /link",
+                    content = @Content(mediaType = "application/json")),
+
+            @ApiResponse(
+                    responseCode = "406",
+                    description = "The URL is malformed, not reachable or is being validated",
                     content = @Content(mediaType = "application/json")),
 
             @ApiResponse(responseCode = "500", content = @Content)
@@ -67,7 +72,7 @@ public class QrCodeController {
         if(!urlService.urlStatusIsOk(hash)){
             JSONObject responseBody = new JSONObject();
             responseBody.put("error", urlService.getUrl(hash));
-            return new ResponseEntity<>(responseBody, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(responseBody, HttpStatus.NOT_ACCEPTABLE);
         }
 
         String urlLocation = SCHEME_HOST + hash;
