@@ -4,7 +4,7 @@ number_of_apps=1
 
 while true
 do
-  res=$(curl -s http://localhost/actuator/metrics/system.load.average.1m | grep value | cut -f2 -d:)
+  res=$(curl -s http://localhost/actuator/metrics/system.load.average.1m | egrep value | cut -f3 -d{ | cut -f1 -d} | cut -f3 -d:)
   echo "load: " $res
   echo "apps: "$number_of_apps
   if [ "$(echo " 5 < $res " | bc -l )" == 1 ] && [ "$number_of_apps" -eq "1" ]; then
